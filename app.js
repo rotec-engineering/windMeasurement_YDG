@@ -9,15 +9,18 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const app = express();
-const confing = require('./config.json')[app.get('env')];
+const config = require('./config.json')[app.get('env')];
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
+app.set('config', config);
 
 app.use(logger('dev'));
 app.use(express.json());
+app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extend: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
