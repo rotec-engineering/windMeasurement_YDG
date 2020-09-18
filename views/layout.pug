@@ -1,7 +1,36 @@
 doctype html
 html
   head
-    title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/color.css')
+    link(rel='stylesheet', href='/stylesheets/common.css')
+    link(rel='stylesheet', href='/stylesheets/header.css')
+    link(rel='stylesheet', href='/stylesheets/chart.css')
+
+    link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css")
+    link(rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css")
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js')
+
+    script(src='https://code.jquery.com/jquery-1.12.4.js')
+    script(src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js")
+    script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.js')
+    // use chart of highcharts
+    script(src='https://code.highcharts.com/highcharts.js')
+    script(src='https://code.highcharts.com/highcharts-more.js')
+    script(src='https://code.highcharts.com/modules/solid-gauge.js')
+    script(src='https://code.highcharts.com/modules/drilldown.js')
+    script(src='https://code.highcharts.com/modules/exporting.js')
+    script(src='https://code.highcharts.com/modules/export-data.js')
+    script(src='https://code.highcharts.com/modules/accessibility.js')
+
   body
+
+    nav#th_white_theme
+      ul.blog_menu
+        li
+          a(href='/index') windCheck
+        li
+          a(href='/windDetail' title='windDetail') windDetail
+        li
+          a(href='[##_guestbook_link_##]') empty
     block content

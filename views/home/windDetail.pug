@@ -1,0 +1,143 @@
+extends ../layout
+
+block content
+    link(rel='stylesheet', href='/css/info.css')
+
+    script.
+        $(function () {
+            $("#startDate").datepicker({defaultDate: new Date()}).val(moment().format('YYYY-MM-DD'));
+            $("#endDate").datepicker({defaultDate: new Date()}).val(moment().format('YYYY-MM-DD'));
+        });
+
+        const infoSearching = () => {
+            search();
+        }
+
+        const search = () => {
+            $.ajax({
+                data: {
+                    'kind': $("select[name= selectSetting]").val(),
+                    'year': $("select[name= selectYear]").val(),
+                    'quarter': $("select[name= selectQuarter]").val(),
+                    'month': $("select[name= selectMonth]").val(),
+                    'week': $("select[name= selectWeek]").val(),
+                    'startDate': $("input[name= startDate]").val(),
+                    'startTime': $("select[name= startTime]").val(),
+                    'endDate': $("input[name= endDate]").val(),
+                    'endTime': $("select[name= endTime]").val()
+                },
+                type: 'get',
+                dataType: 'html',
+                url: "/windDetail/api/search",
+                contentType: 'application/json',
+                success: (result) => {
+                    $("#info-table > tbody").html(result);
+                },
+                error: (err) => {
+                    console.log(err)
+                }
+            })
+        }
+
+        const selectFrom = (e) => {
+            if (e.value != 'custom') {
+                document.getElementsByName("startDate")[0].disabled = true;
+                document.getElementsByName("startTime")[0].disabled = true;
+                document.getElementsByName("endDate")[0].disabled = true;
+                document.getElementsByName("endTime")[0].disabled = true;
+            } else {
+                document.getElementsByName("startDate")[0].disabled = false;
+                document.getElementsByName("startTime")[0].disabled = false;
+                document.getElementsByName("endDate")[0].disabled = false;
+                document.getElementsByName("endTime")[0].disabled = false;
+            }
+
+            if (e.value == 'year') {
+                document.getElementsByName("selectYear")[0].style.display = 'inline';
+            } else {
+                document.getElementsByName("selectYear")[0].style.display = 'none';
+            }
+
+            if (e.value == 'quarter') {
+                document.getElementsByName("selectYear")[0].style.display = 'inline';
+                document.getElementsByName("selectQuarter")[0].style.display = 'inline';
+            } else {
+                document.getElementsByName("selectQuarter")[0].style.display = 'none';
+            }
+
+            if (e.value == 'month') {
+                document.getElementsByName("selectYear")[0].style.display = 'inline';
+                document.getElementsByName("selectMonth")[0].style.display = 'inline';
+            } else {
+                document.getElementsByName("selectMonth")[0].style.display = 'none';
+            }
+
+            if (e.value == 'week') {
+                document.getElementsByName("selectYear")[0].style.display = 'inline';
+                document.getElementsByName("selectWeek")[0].style.display = 'inline';
+                document.getElementsByName("selectMonth")[0].style.display = 'inline';
+            } else {
+                document.getElementsByName("selectWeek")[0].style.display = 'none';
+            }
+        }
+
+    #info-container.container-fluid
+        .row.info-title
+            .col-12 측정자료 조회
+        .row.info-search(style="margin-left: auto; margin-right: auto; margin-top:1%; width: 50%;")
+            .col-12
+                .row
+                    .col-3 ■ 기간설정
+                    .col-9
+                        select#selectSetting(name="selectSetting" style="width:200px" onchange="selectFrom(this)" class='mr-2')
+                            option(value="custom") 사용자 지정
+                            option(value="year") 연간
+                            option(value="quarter") 분기간
+                            option(value="month") 월간
+                            option(value="week") 주간
+                        select#selectYear(name="selectYear" style="display:none; width:100px" class='mr-2')
+                            -for (let i = 2020; i >= 2006; i--)
+                                option(value=i)= i + '년'
+                        select#selectQuarter(name="selectQuarter" style="display:none; width:100px" class='mr-2')
+                            -for (let i = 1; i <= 4; i++)
+                                option(value=i)= i + '사분기'
+                        select#selectMonth(name="selectMonth" style="display:none; width:70px" class='mr-2')
+                            -for (let i = 1; i <= 12; i++)
+                                option(value=i)= i + '월'
+                        select#selectWeek(name="selectWeek" style="display:none; width:70px" class='mr-2')
+                            -for (let i = 1; i <= 6; i++)
+                                 option(value=i)= i + '주차'
+                .row
+                    .col-3 ■ 시작날짜
+                    .col-9
+                        input#startDate(type="text", name="startDate" class='mr-2')
+                        select#starTime(name="startTime")
+                            -for (let i = 1; i < 25; i++)       // 시간
+                                option(value = i < 10 ? '0' + (i - 1) : i - 1)= i < 10 ? '0' + i + '시' : i + '시'
+                .row
+                    .col-3 ■ 종료날짜
+                    .col-9
+                        input#endDate(type="text", name="endDate" class='mr-2')
+                        select#endTime(name="endTime" class='mr-2')
+                            -for (let i = 1; i < 25; i++)       // 시간
+                                option(value = i < 10 ? '0' + (i - 1) : i - 1)= i < 10 ? '0' + i + '시' : i + '시'
+                        button(onClick='infoSearching()' class='btn btn-primary mr-2') 검색
+
+        .row.info-table
+            .col-12
+                table#info-table(style="margin-left: auto; margin-right: auto; margin-top:1%; width: 50%;")
+                    thead
+                        tr
+                            th(rowspan="2") 날짜<br/>(년-월-일)
+                            th(rowspan="2") 풍향
+                            th(rowspan="2") 풍속(m/s)
+                    tbody
+                        each map in datas
+                            tr
+                                td #{map.rgst_dt}
+                                td
+                                    img.wind-direction-icon(src="images/arrow-icon.png", alt="wind-direction" style={
+                                        width: '40px',
+                                        transform: `rotate(${map.windDirection}deg)`
+                                    })
+                                td #{map.windSpeed} (m/s)

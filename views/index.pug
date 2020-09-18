@@ -1,5 +1,640 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  link(rel='stylesheet', href='/css/info.css')
+  body(style="background-color: #FFFFFF")
+    div
+      .left(style="width: 47%; height: 800px; float: left; box-sizing: border-box; background-color: #e0ffff  ; margin-top: 3%; margin-left: 3%")
+        .row
+          .col
+            table#windInfo
+              thead
+                tr(style="margin-left: 10%; align: center")
+                  th#image(style="width: 50%" colspan='1')
+                    img.wind-direction-icon(src="images/arrow-icon.png", alt="wind-direction" style={
+                      width: '250px',
+                      transform: `rotate(${datas[0].windDirection}deg)`
+                    })
+                  th(style="width: 50%;")
+                    figure.highcharts-figure
+                      #container-speed.chart-container
+                tr
+                  th
+                    p(style="font-size: 20px; text-align: center") 현재 풍향
+                  th
+                    p(style="width: 30%; font-size: 20px; text-align: right") 현재 풍속
+
+
+            -for(let i = 0; i < 7; i++)
+              input(id='dayWindData' + i, type = "hidden", value = `${dayWindData[i].windSpeed}`)
+              input(id='dayExpress' + i, type = "hidden", value = `${dayWindData[i].rgst_dt}`)
+            -for(let i = 0; i < 12 * 6; i++)
+               input(id = 'windSpeedEachDay' + i, type = "hidden", value = `${timeWindDataFor6days[i].windSpeed}`)
+            -for(let i = 0; i < timeWindDataForLastDay.length; i++)
+              input(id='windSpeedLastDay' + i, type = 'hidden', value = `${timeWindDataForLastDay[i].windSpeed}`)
+
+            script.
+              var gaugeOptions = {
+                chart: {
+                  type: 'solidgauge'
+                },
+
+                title: null,
+
+                pane: {
+                  center: ['50%', '85%'],
+                  size: '140%',
+                  startAngle: -90,
+                  endAngle: 90,
+                  background: {
+                    backgroundColor:
+                            Highcharts.defaultOptions.legend.backgroundColor || '#EEE',
+                    innerRadius: '60%',
+                    outerRadius: '100%',
+                    shape: 'arc'
+                  }
+                },
+
+                exporting: {
+                  enabled: false
+                },
+
+                tooltip: {
+                  enabled: false
+                },
+
+                // the value axis
+                yAxis: {
+                  stops: [
+                    [0.1, '#55BF3B'], // green
+                    [0.5, '#DDDF0D'], // yellow
+                    [0.9, '#DF5353'] // red
+                  ],
+                  lineWidth: 0,
+                  tickWidth: 0,
+                  minorTickInterval: null,
+                  tickAmount: 2,
+                  title: {
+                    y: -70
+                  },
+                  labels: {
+                    y: 16
+                  }
+                },
+
+                plotOptions: {
+                  solidgauge: {
+                    dataLabels: {
+                      y: 5,
+                      borderWidth: 0,
+                      useHTML: true
+                    }
+                  }
+                }
+              };
+
+              // The wind speed
+              var chartSpeed = Highcharts.chart('container-speed', Highcharts.merge(gaugeOptions, {
+                yAxis: {
+                  min: 0,
+                  max: 60,
+                  title: {
+                    text: 'WindSpeed'
+                  }
+                },
+
+                credits: {
+                  enabled: false
+                },
+
+                series: [{
+                  name: 'WindSpeed',
+                  data: [60],
+                  dataLabels: {
+                    format:
+                            '<div style="text-align:center">' +
+                            '<span style="font-size:25px">{y}</span><br/>' +
+                            '<span style="font-size:12px;opacity:0.4">m/s</span>' +
+                            '</div>'
+                  },
+                  tooltip: {
+                    valueSuffix: ' m/s'
+                  }
+                }]
+
+              }));
+
+        .row
+          .col(style="width: 100%; float: right; box-sizing: border-box")
+            figure.highcharts-figure
+              #container
+
+            script.
+              var barChart = Highcharts.chart('container', {
+                chart: {
+                  type: 'column'
+                },
+                title: {
+                  text: 'Wind Speed for one month in 2020'
+                },
+                accessibility: {
+                  announceNewData: {
+                    enabled: true
+                  }
+                },
+                xAxis: {
+                  type: 'category'
+                },
+                yAxis: {
+                  title: {
+                    text: 'WindSpeed (m/s)'
+                  }
+
+                },
+                legend: {
+                  enabled: false
+                },
+                plotOptions: {
+                  series: {
+                    borderWidth: 1,
+                    dataLabels: {
+                      enabled: true,
+                      format: '{point.y:.1f}m/s'
+                    }
+                  }
+                },
+
+                tooltip: {
+                  headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                  pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}m/s</b> in day <br/>'
+                },
+
+                series: [
+                  {
+                    name: "windSpeedOnMonth",
+                    colorByPoint: true,
+                    data: []
+                  }
+                ],
+                drilldown: {
+                  series: [
+                    {
+                      name: document.getElementById('dayExpress' + 6).value,
+                      id: document.getElementById('dayExpress' + 6).value,
+                      data: [
+                        [
+                          "0시",
+                          document.getElementById('windSpeedEachDay' + 71).value * 1
+                        ],
+                        [
+                          "2시",
+                          document.getElementById('windSpeedEachDay' + 70).value * 1
+                        ],
+                        [
+                          "4시",
+                          document.getElementById('windSpeedEachDay' + 69).value * 1
+                        ],
+                        [
+                          "6시",
+                          document.getElementById('windSpeedEachDay' + 68).value * 1
+                        ],
+                        [
+                          "8시",
+                          document.getElementById('windSpeedEachDay' + 67).value * 1
+                        ],
+                        [
+                          "10시",
+                          document.getElementById('windSpeedEachDay' + 66).value * 1
+                        ],
+                        [
+                          "12시",
+                          document.getElementById('windSpeedEachDay' + 65).value * 1
+                        ],
+                        [
+                          "14시",
+                          document.getElementById('windSpeedEachDay' + 64).value * 1
+                        ],
+                        [
+                          "16시",
+                          document.getElementById('windSpeedEachDay' + 63).value * 1
+                        ],
+                        [
+                          "18시",
+                          document.getElementById('windSpeedEachDay' + 62).value * 1
+                        ],
+                        [
+                          "20시",
+                          document.getElementById('windSpeedEachDay' + 61).value * 1
+                        ],
+                        [
+                          "22시",
+                          document.getElementById('windSpeedEachDay' + 60).value * 1
+                        ]
+                      ]
+                    },
+                    {
+                      name: document.getElementById('dayExpress' + 5).value,
+                      id: document.getElementById('dayExpress' + 5).value,
+                      data: [
+                        [
+                          "0시",
+                          document.getElementById('windSpeedEachDay' + 59).value * 1
+                        ],
+                        [
+                          "2시",
+                          document.getElementById('windSpeedEachDay' + 58).value * 1
+                        ],
+                        [
+                          "4시",
+                          document.getElementById('windSpeedEachDay' + 57).value * 1
+                        ],
+                        [
+                          "6시",
+                          document.getElementById('windSpeedEachDay' + 56).value * 1
+                        ],
+                        [
+                          "8시",
+                          document.getElementById('windSpeedEachDay' + 55).value * 1
+                        ],
+                        [
+                          "10시",
+                          document.getElementById('windSpeedEachDay' + 54).value * 1
+                        ],
+                        [
+                          "12시",
+                          document.getElementById('windSpeedEachDay' + 53).value * 1
+                        ],
+                        [
+                          "14시",
+                          document.getElementById('windSpeedEachDay' + 52).value * 1
+                        ],
+                        [
+                          "16시",
+                          document.getElementById('windSpeedEachDay' + 51).value * 1
+                        ],
+                        [
+                          "18시",
+                          document.getElementById('windSpeedEachDay' + 50).value * 1
+                        ],
+                        [
+                          "20시",
+                          document.getElementById('windSpeedEachDay' + 49).value * 1
+                        ],
+                        [
+                          "22시",
+                          document.getElementById('windSpeedEachDay' + 48).value * 1
+                        ]
+                      ]
+                    },
+                    {
+                      name: document.getElementById('dayExpress' + 4).value,
+                      id: document.getElementById('dayExpress' + 4).value,
+                      data: [
+                        [
+                          "0시",
+                          document.getElementById('windSpeedEachDay' + 47).value * 1
+                        ],
+                        [
+                          "2시",
+                          document.getElementById('windSpeedEachDay' + 46).value * 1
+                        ],
+                        [
+                          "4시",
+                          document.getElementById('windSpeedEachDay' + 45).value * 1
+                        ],
+                        [
+                          "6시",
+                          document.getElementById('windSpeedEachDay' + 44).value * 1
+                        ],
+                        [
+                          "8시",
+                          document.getElementById('windSpeedEachDay' + 43).value * 1
+                        ],
+                        [
+                          "10시",
+                          document.getElementById('windSpeedEachDay' + 42).value * 1
+                        ],
+                        [
+                          "12시",
+                          document.getElementById('windSpeedEachDay' + 41).value * 1
+                        ],
+                        [
+                          "14시",
+                          document.getElementById('windSpeedEachDay' + 40).value * 1
+                        ],
+                        [
+                          "16시",
+                          document.getElementById('windSpeedEachDay' + 39).value * 1
+                        ],
+                        [
+                          "18시",
+                          document.getElementById('windSpeedEachDay' + 38).value * 1
+                        ],
+                        [
+                          "20시",
+                          document.getElementById('windSpeedEachDay' + 37).value * 1
+                        ],
+                        [
+                          "22시",
+                          document.getElementById('windSpeedEachDay' + 36).value * 1
+                        ]
+                      ]
+                    },
+                    {
+                      name: document.getElementById('dayExpress' + 3).value,
+                      id: document.getElementById('dayExpress' + 3).value,
+                      data: [
+                        [
+                          "0시",
+                          document.getElementById('windSpeedEachDay' + 35).value * 1
+                        ],
+                        [
+                          "2시",
+                          document.getElementById('windSpeedEachDay' + 34).value * 1
+                        ],
+                        [
+                          "4시",
+                          document.getElementById('windSpeedEachDay' + 33).value * 1
+                        ],
+                        [
+                          "6시",
+                          document.getElementById('windSpeedEachDay' + 32).value * 1
+                        ],
+                        [
+                          "8시",
+                          document.getElementById('windSpeedEachDay' + 31).value * 1
+                        ],
+                        [
+                          "10시",
+                          document.getElementById('windSpeedEachDay' + 30).value * 1
+                        ],
+                        [
+                          "12시",
+                          document.getElementById('windSpeedEachDay' + 29).value * 1
+                        ],
+                        [
+                          "14시",
+                          document.getElementById('windSpeedEachDay' + 28).value * 1
+                        ],
+                        [
+                          "16시",
+                          document.getElementById('windSpeedEachDay' + 27).value * 1
+                        ],
+                        [
+                          "18시",
+                          document.getElementById('windSpeedEachDay' + 26).value * 1
+                        ],
+                        [
+                          "20시",
+                          document.getElementById('windSpeedEachDay' + 25).value * 1
+                        ],
+                        [
+                          "22시",
+                          document.getElementById('windSpeedEachDay' + 24).value * 1
+                        ]
+                      ]
+                    },
+                    {
+                      name: document.getElementById('dayExpress' + 2).value,
+                      id: document.getElementById('dayExpress' + 2).value,
+                      data: [
+                        [
+                          "0시",
+                          document.getElementById('windSpeedEachDay' + 23).value * 1
+                        ],
+                        [
+                          "2시",
+                          document.getElementById('windSpeedEachDay' + 22).value * 1
+                        ],
+                        [
+                          "4시",
+                          document.getElementById('windSpeedEachDay' + 21).value * 1
+                        ],
+                        [
+                          "6시",
+                          document.getElementById('windSpeedEachDay' + 20).value * 1
+                        ],
+                        [
+                          "8시",
+                          document.getElementById('windSpeedEachDay' + 19).value * 1
+                        ],
+                        [
+                          "10시",
+                          document.getElementById('windSpeedEachDay' + 18).value * 1
+                        ],
+                        [
+                          "12시",
+                          document.getElementById('windSpeedEachDay' + 17).value * 1
+                        ],
+                        [
+                          "14시",
+                          document.getElementById('windSpeedEachDay' + 16).value * 1
+                        ],
+                        [
+                          "16시",
+                          document.getElementById('windSpeedEachDay' + 15).value * 1
+                        ],
+                        [
+                          "18시",
+                          document.getElementById('windSpeedEachDay' + 14).value * 1
+                        ],
+                        [
+                          "20시",
+                          document.getElementById('windSpeedEachDay' + 13).value * 1
+                        ],
+                        [
+                          "22시",
+                          document.getElementById('windSpeedEachDay' + 12).value * 1
+                        ]
+                      ]
+                    },
+                    {
+                      name: document.getElementById('dayExpress' + 1).value,
+                      id: document.getElementById('dayExpress' + 1).value,
+                      data: [
+                        [
+                          "0시",
+                          document.getElementById('windSpeedEachDay' + 11).value * 1
+                        ],
+                        [
+                          "2시",
+                          document.getElementById('windSpeedEachDay' + 10).value * 1
+                        ],
+                        [
+                          "4시",
+                          document.getElementById('windSpeedEachDay' + 9).value * 1
+                        ],
+                        [
+                          "6시",
+                          document.getElementById('windSpeedEachDay' + 8).value * 1
+                        ],
+                        [
+                          "8시",
+                          document.getElementById('windSpeedEachDay' + 7).value * 1
+                        ],
+                        [
+                          "10시",
+                          document.getElementById('windSpeedEachDay' + 6).value * 1
+                        ],
+                        [
+                          "12시",
+                          document.getElementById('windSpeedEachDay' + 5).value * 1
+                        ],
+                        [
+                          "14시",
+                          document.getElementById('windSpeedEachDay' + 4).value * 1
+                        ],
+                        [
+                          "16시",
+                          document.getElementById('windSpeedEachDay' + 3).value * 1
+                        ],
+                        [
+                          "18시",
+                          document.getElementById('windSpeedEachDay' + 2).value * 1
+                        ],
+                        [
+                          "20시",
+                          document.getElementById('windSpeedEachDay' + 1).value * 1
+                        ],
+                        [
+                          "22시",
+                          document.getElementById('windSpeedEachDay' + 0).value * 1
+                        ]
+                      ]
+                    },
+                    {
+                      name: document.getElementById('dayExpress' + 0).value,
+                      id: document.getElementById('dayExpress' + 0).value,
+                      data: [
+                        [
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? "0시" : "(feature) 0시",
+                          document.getElementById('windSpeedLastDay' + 0) !== null ? document.getElementById('windSpeedLastDay' + 0).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? "2시" : "(feature) 2시",
+                          document.getElementById('windSpeedLastDay' + 1) !== null ? document.getElementById('windSpeedLastDay' + 1).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? "4시" : "(feature) 4시",
+                          document.getElementById('windSpeedLastDay' + 2) !== null ? document.getElementById('windSpeedLastDay' + 2).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? "6시" : "(feature) 6시",
+                          document.getElementById('windSpeedLastDay' + 3) !== null ? document.getElementById('windSpeedLastDay' + 3).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? "8시" : "(feature) 8시",
+                          document.getElementById('windSpeedLastDay' + 4) !== null ? document.getElementById('windSpeedLastDay' + 4).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? "10시" : "(feature) 10시",
+                          document.getElementById('windSpeedLastDay' + 5) !== null ? document.getElementById('windSpeedLastDay' + 5).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? "12시" : "(feature) 12시",
+                          document.getElementById('windSpeedLastDay' + 6) !== null ? document.getElementById('windSpeedLastDay' + 6).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? "14시" : "(feature) 14시",
+                          document.getElementById('windSpeedLastDay' + 7) !== null ? document.getElementById('windSpeedLastDay' + 7).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? "16시" : "(feature) 16시",
+                          document.getElementById('windSpeedLastDay' + 8) !== null ? document.getElementById('windSpeedLastDay' + 8).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 9) !== null ? "18시" : "(feature) 18시",
+                          document.getElementById('windSpeedLastDay' + 9) !== null ? document.getElementById('windSpeedLastDay' + 9).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 10) !== null ? "20시" : "(feature)20시",
+                          document.getElementById('windSpeedLastDay' + 10) !== null ? document.getElementById('windSpeedLastDay' + 10).value * 1 : null
+                        ],
+                        [
+                          document.getElementById('windSpeedLastDay' + 10) !== null ? "22시" : "(feature)22시",
+                          document.getElementById('windSpeedLastDay' + 11) !== null ? document.getElementById('windSpeedLastDay' + 11).value * 1 : null
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              });
+
+              setInterval(function () {
+                setWindData();
+              }, 3000);
+
+              const setWindData = () => {
+                  $.ajax({
+                    data: {},
+                    type: 'get',
+                    dataType: 'html',
+                    url: '/index/api/search',
+                    contentType: 'application/json',
+                    success: (result) => {
+                      const point = chartSpeed.series[0].points[0];
+                      const newVal = result * 1;
+
+                      point.update(newVal);
+                    },
+                    error: (err) => {
+                      console.log(err);
+                    }
+                  })
+              }
+              barChart.series[0].setData([
+                {
+                  name: document.getElementById('dayExpress' + 6).value,
+                  y: document.getElementById('dayWindData' + 6).value * 1,
+                  drilldown: document.getElementById('dayExpress' + 6).value
+                },
+                {
+                  name: document.getElementById('dayExpress' + 5).value,
+                  y: document.getElementById('dayWindData' + 5).value * 1,
+                  drilldown: document.getElementById('dayExpress' + 5).value
+                },
+                {
+                  name: document.getElementById('dayExpress' + 4).value,
+                  y: document.getElementById('dayWindData' + 4).value * 1,
+                  drilldown: document.getElementById('dayExpress' + 4).value
+                },
+                {
+                  name: document.getElementById('dayExpress' + 3).value,
+                  y: document.getElementById('dayWindData' + 3).value * 1,
+                  drilldown: document.getElementById('dayExpress' + 3).value
+                },
+                {
+                  name: document.getElementById('dayExpress' + 2).value,
+                  y: document.getElementById('dayWindData' + 2).value * 1,
+                  drilldown: document.getElementById('dayExpress' + 2).value
+                },
+                {
+                  name: document.getElementById('dayExpress' + 1).value,
+                  y: document.getElementById('dayWindData' + 1).value * 1,
+                  drilldown: document.getElementById('dayExpress' + 1).value
+                },
+                {
+                  name: document.getElementById('dayExpress' + 0).value,
+                  y: document.getElementById('dayWindData' + 0).value * 1,
+                  drilldown: document.getElementById('dayExpress' + 0).value
+                }
+              ]);
+
+      .right(style="width: 45%; height: 800px; float: right; box-sizing: border-box; background-color: #e0ffff; margin-top: 3%; margin-right: 3%; margin-bottom: 3%;")
+        table#info-table(style="margin-left: auto; margin-right: auto; width: 70%;")
+          thead(style='border: 1px solid #000')
+            p(style="margin-top: 2%; font-size: 30px; text-align: center") 풍향 / 풍속 데이터
+            tr(style='background-color: #DDE7E7')
+              th(rowspan="2" style="width: 33%; text-align: center; border: 2px solid #000") 날짜<br/>(년-월-일)
+              th(rowspan="2" style="width: 33%; text-align: center; border: 2px solid #000") 풍향
+              th(rowspan="2" style="width: 33%; text-align: center; border: 2px solid #000") 풍속(m/s)
+          tbody(style='border: 2px solid #000')
+            each map in datas
+              tr(style='background-color: #FFFFFF')
+                td(style="width: 33%; text-align: center; border: 1px solid #000") #{map.rgst_dt}
+                td(style="width: 33%; text-align: center; border: 1px solid #000")
+                  img.wind-direction-icon(src="images/arrow-icon.png", alt="wind-direction" style={
+                    width: '40px',
+                    transform: `rotate(${map.windDirection}deg)`
+                  })
+                td(style="width: 33%; text-align: center; border: 1px solid #000") #{map.windSpeed} (m/s)

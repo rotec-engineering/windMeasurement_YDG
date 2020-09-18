@@ -1,0 +1,46 @@
+html, body {
+    font-family: "Youth","NotoSerif","serif";
+    padding: 0;
+    margin: 0;
+    font-size: 18px;
+}
+a, button {
+    transition: all .2s ease-in-out;
+    cursor: pointer;
+}
+a {
+    text-decoration: none;
+}
+button {
+    outline: none;
+    border: none;
+}
+
+/*nav*/
+ul {
+    list-style: none;
+}
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: .25em;
+    height: 55px;
+}
+nav ul {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0;
+}
+nav ul li {
+    padding: 0;
+    margin: 0;
+}
+nav ul li a {
+    padding: 1em;
+    font-size: 0.85em;
+    display: flex;
+    align-items: flex-end;
+}

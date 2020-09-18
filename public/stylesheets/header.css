@@ -1,0 +1,37 @@
+header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+header .hd_logo {
+    padding: 01em;
+}
+header .hd_logo h1 {
+    font-size: 2em;
+}
+header .hd_search {
+    flex:1;
+    padding:0.5em;
+}
+header .hd_search s_sidebar_element {
+    display:flex;
+    align-items:center;
+}
+header .hd_search s_sidebar_element input {
+    outline: none;                      /*눌렀을때테두리에나오는파란색하이라이트제거*/
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-size: 1.25em;
+    padding-bottom: .25em;
+    flex: 1;
+    transition: all .2s ease-in-out;
+}
+header .hd_search s_sidebar_element button {
+    width: 40px;
+    background-color: transparent;       /*부모와같은색상*/
+}
