@@ -3,40 +3,6 @@ const router = express.Router();
 const moment = require('moment');
 const connection = require("../connection");
 
-const getDustStatus = (value) => {
-    if (value <= 30) {
-        return 'blue'
-    }
-    else if (value > 30 && value <= 80) {
-        return 'green'
-    }
-    else if (value > 80 && value <= 150) {
-        return 'yellow'
-    }
-    else if (value > 150 && value <= 600) {
-        return 'red'
-    }
-    else {
-        return 'blue'
-    }
-}
-const getUltraFineDustStatus = (value) => {
-    if (value <= 15) {
-        return 'blue'
-    }
-    else if (value > 15 && value <= 35) {
-        return 'green'
-    }
-    else if (value > 35 && value <= 75) {
-        return 'yellow'
-    }
-    else if (value > 75 && value <= 500) {
-        return 'red'
-    }
-    else {
-        return 'blue'
-    }
-}
 const conditionQuery = (req_Obj) => {
     const param = req_Obj;
     const kind = param.kind;
@@ -95,10 +61,6 @@ router.get('/', function(req, res, next) {
         if (!err) {
             res.render('home/windDetail', {'datas': rows.map(data => {
                     return {
-                        dust: data.dust,
-                        dustStatus: getDustStatus(data.dust),
-                        ultrafine: data.ultrafine,
-                        ultrafineStatus: getUltraFineDustStatus(data.ultrafine),
                         windDirection: data.windDirection,
                         windSpeed: data.windSpeed,
                         temperature: data.temperature,
@@ -124,7 +86,9 @@ router.get('/api/search', (req, res, next) => {
                     <tr>
                         <td>${moment(data.rgst_dt).format('YYYY-MM-DD')}</td>
                         <td>
-                            <img class="wind-direction-icon" src="images/arrow-icon.png" alt="wind-direction" style="width: 40px; transform: rotate(${data.windDirection});" />
+                        
+                            <img class="wind-direction-icon" src="images/arrow-icon.png" alt="wind-direction" style="width: 40px; transform: rotate(${data.windDirection}deg);" />
+                            
                         </td>
                         <td>${data.windSpeed} (m/s)</td>
 
