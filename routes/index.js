@@ -3,19 +3,6 @@ const router = express.Router();
 const moment = require('moment');
 const connection = require("../routes/connection");
 
-// 현 시간을 나타내는 함수
-function todayDate() {
-  let today = new Date();
-
-  let year = today.getFullYear();
-  let month = today.getMonth();
-  let date = today.getDate();
-
-  let hours = today.getHours();
-  let minutes = today.getMinutes();
-
-  return year + '/' + month + '/' + date + ' ' + hours + ':' + minutes;
-}
 const tableQuery = (req_Obj) => {
   return `
     SELECT AVG(windDirection) AS windDirection,
@@ -104,22 +91,4 @@ router.get('/', function(req, res, next) {
   })
 });
 
-router.get('/api/search', function(req, res, next) {
-  const todayWindSpeedSearchQuery = `
-    SELECT SUBSTR(windSpeed, 1, 3) AS windSpeed
-    FROM finedust_tb
-    order by rgst_dt desc
-  `;
-
-  connection.query(todayWindSpeedSearchQuery, function (err, rows, fields) {
-    if(!err) {
-      const result = rows[0].windSpeed
-
-      res.send(result);
-    } else {
-      console.log('(FAIL)');
-      res.send(err);
-    }
-  })
-})
 module.exports = router;

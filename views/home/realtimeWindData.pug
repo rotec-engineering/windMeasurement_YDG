@@ -105,3 +105,25 @@ script.
         }]
 
     }));
+    setInterval(function () {
+        setWindData();
+    }, 3000);
+
+    const setWindData = () => {
+    $.ajax({
+    data: {},
+        type: 'get',
+        dataType: 'html',
+        url: '/realtimeWindData/api/search',
+        contentType: 'application/json',
+        success: (result) => {
+            const point = chartSpeed.series[0].points[0];
+            const newVal = result * 1;
+
+            point.update(newVal);
+            },
+        error: (err) => {
+            console.log(err);
+            }
+        })
+    }
