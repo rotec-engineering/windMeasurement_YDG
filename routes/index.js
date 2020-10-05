@@ -17,14 +17,6 @@ const tableQuery = () => {
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  const dayWindQuery = `
-    SELECT ROUND(AVG(windSpeed), 2) AS windSpeed,  SUBSTR(rgst_dt, 6, 5) AS rgst_dt
-    FROM finedust_tb
-    WHERE now() >= rgst_dt
-    GROUP BY LEFT(rgst_dt, 10)
-    order by rgst_dt desc
-  `;
-
   const timeWindQueryForLast6daysQuery = `
     SELECT ROUND(AVG(windSpeed), 2) AS windSpeed
     FROM finedust_tb
@@ -41,16 +33,7 @@ router.get('/', function(req, res) {
     GROUP BY LEFT(rgst_dt, 13)
   `;
 
-  let dayWindData, timeWindDataFor6days, timeWindDataForLastDay;
-
-  connection.query(dayWindQuery, function (err, rows) {
-    if(!err) {
-      dayWindData = rows;
-    } else {
-      console.log('dayWindData send Err' + err);
-      res.render('index', err);
-    }
-  })
+  let timeWindDataFor6days, timeWindDataForLastDay;
 
   connection.query(timeWindQueryForLast6daysQuery, function (err, rows) {
     if(!err) {
@@ -78,7 +61,7 @@ router.get('/', function(req, res) {
             windSpeed: data.windSpeed,
             rgst_dt: moment(data.rgst_dt).format('YYYY-MM-DD')
           }
-        }), 'dayWindData': dayWindData, 'timeWindDataFor6days': timeWindDataFor6days, 'timeWindDataForLastDay': timeWindDataForLastDay
+        }), 'timeWindDataFor6days': timeWindDataFor6days, 'timeWindDataForLastDay': timeWindDataForLastDay
       });
     }
     else {

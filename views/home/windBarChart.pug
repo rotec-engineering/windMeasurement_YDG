@@ -2,10 +2,28 @@ figure.highcharts-figure
     #container
 
 script.
-    let drilldownData = setDrilldownForEachDay();
-    let barChart = Highcharts.chart('container', {
+    let drilldownData = {};                                             // used when drilldown' data is changed, almost under page
+    let options = {                                                     // for barChart options
         chart: {
-            type: 'column'
+            type: 'column',
+            events: {
+                drilldown: function (e) {
+                    if (!e.seriesOptions) {
+                        let chart = this,
+                            drilldowns = drilldownData,
+                            series = drilldowns[e.point.name];
+
+                        // Show the loading label
+                        chart.showLoading('Simulating Ajax ...');
+
+                        setTimeout(function () {
+                            chart.hideLoading();
+                            chart.addSeriesAsDrilldown(e.point, series);
+                        }, 1000);
+                    }
+
+                }
+            }
         },
         title: {
             text: 'Wind Speed for one month in 2020'
@@ -36,12 +54,10 @@ script.
                 }
             }
         },
-
         tooltip: {
             headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}m/s</b> in day <br/>'
         },
-
         series: [
             {
                 name: "windSpeedOnMonth",
@@ -50,30 +66,29 @@ script.
             }
         ],
         drilldown: {
-            series: drilldownData
+            series: []
         }
-    });
+    };
+    let barChart = Highcharts.chart('container', options);
 
     //set data to drilldwon of barChart for each day
-    function setDrilldownForEachDay() {
-        let setWindDataOfDrilldownForEachDay = [];
+    function setDrilldownForEachDay(dayWindData) {
+        let setWindDataOfDrilldownForEachDay = {};
 
         for (let i = 6; i >= 0; i--) {
-            let drilldownName = document.getElementById('dayExpress' + i).value;
-            let drilldownId = document.getElementById('dayExpress' + i).value;
+            let drilldownName = dayWindData[i].rgst_dt;
+            let drilldownId = dayWindData[i].rgst_dt;
 
             if (i === 0) {
-                setWindDataOfDrilldownForEachDay.push({
+                setWindDataOfDrilldownForEachDay[drilldownId] = {
                     name: drilldownName,
-                    id: drilldownId,
                     data: setLastDrilldown()
-                })
+                }
             } else {
-                setWindDataOfDrilldownForEachDay.push({
+                setWindDataOfDrilldownForEachDay[drilldownId] = {
                     name: drilldownName,
-                    id: drilldownId,
                     data: setDrilldown(i)
-                })
+                }
             }
         }
 
@@ -137,25 +152,42 @@ script.
         return setWindData;
     }
 
-    setTimeout(function () {                                                        // cuz when user use the drilldown, if the data has updated, the error would be happened.
+    setTimeout(function () {                                                            // cuz when user use the drilldown, if the data has updated, the error would be happened.
         updateBarChart();
+        function updateBarChart() {
+            $.ajax({
+                data: {},
+                type: 'get',
+                dataType: 'json',
+                url: '/windBarChart/api/update',
+                contentType: 'application/json',
+                success: (result) => {
+                    const chartUpdateForDay = barChart.series[0];
+                    chartUpdateForDay.setData(setBarChart(result));                      // set BarChart (7 graph -> content name, windSpeed, drilldownName)
+
+                },
+                error: (err) => {
+                    console.log(err);
+                }
+            })
+        }
+
+        updateDrilldown();
+        function updateDrilldown() {
+            $.ajax({
+                data: {},
+                type: 'get',
+                dataType: 'json',
+                url: '/windBarChart/api/update',
+                contentType: 'application/json',
+                success: (result) => {
+                    drilldownData = setDrilldownForEachDay(result);
+                },
+                error: (err) => {
+                    console.log(err);
+                }
+            })
+        }
     }, 2000);
 
-    const updateBarChart = () => {
-        $.ajax({
-            data: {},
-            type: 'get',
-            dataType: 'json',
-            url: '/windBarChart/api/update',
-            contentType: 'application/json',
-            success: (result) => {
-                // result = JSON.parse(result);                                        // data receive as String so I transfer that to JSON type
-                const chartUpdateForDay = barChart.series[0];
 
-                chartUpdateForDay.setData(setBarChart(result));                      // set BarChart (7 graph -> content name, windSpeed, drilldownName)
-            },
-            error: (err) => {
-                console.log(err);
-            }
-        })
-    }
