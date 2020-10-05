@@ -10,7 +10,6 @@ block content
             include ./home/realtimeWindData.pug
 
           -for(let i = 0; i < 7; i++)
-            input(id='dayWindData' + i, type = "hidden", value = `${dayWindData[i].windSpeed}`)
             input(id='dayExpress' + i, type = "hidden", value = `${dayWindData[i].rgst_dt}`)
           -for(let i = 0; i < 12 * 6; i++)
              input(id = 'windSpeedEachDay' + i, type = "hidden", value = `${timeWindDataFor6days[i].windSpeed}`)

@@ -7,6 +7,7 @@ const logger = require('morgan');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const windBarChartRouter = require('./routes/service/windBarChart');
 const realtimeWindDataRouter = require('./routes/service/realtimeWindData');
 const windDetailRouter = require('./routes/service/windDetail');
 
@@ -30,6 +31,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/index', indexRouter);
+app.use('/windBarChart', windBarChartRouter);
 app.use('/realtimeWindData', realtimeWindDataRouter);
 app.use('/windDetail', windDetailRouter);
 

@@ -2,7 +2,8 @@ figure.highcharts-figure
     #container
 
 script.
-    var barChart = Highcharts.chart('container', {
+    let drilldownData = setDrilldownForEachDay();
+    let barChart = Highcharts.chart('container', {
         chart: {
             type: 'column'
         },
@@ -49,7 +50,7 @@ script.
             }
         ],
         drilldown: {
-            series: setDrilldownForEachDay()
+            series: drilldownData
         }
     });
 
@@ -106,6 +107,7 @@ script.
         for (let i = 0, j = 0; i < 12; i++, j++) {
             let contentName = document.getElementById('windSpeedLastDay' + i) !== null ? time[j] : "(feature)" + time[j];
             let dataValue = document.getElementById('windSpeedLastDay' + i) !== null ? document.getElementById('windSpeedLastDay' + i).value * 1 : null;
+
             setWindDataOfDrilldown.push(
                 [
                     contentName,
@@ -118,12 +120,12 @@ script.
     }
 
     // set data to barChart
-    function setBarChart() {
+    function setBarChart(dayWindData) {
         let setWindData = [];
 
         for (let i = 6; i >= 0; i--) {
-            let graphContentsName = document.getElementById('dayExpress' + i).value;
-            let windSpeedData = document.getElementById('dayWindData' + i).value * 1;
+            let graphContentsName = dayWindData[i].rgst_dt;
+            let windSpeedData = dayWindData[i].windSpeed * 1;
 
             setWindData.push({
                 name: graphContentsName,
@@ -135,4 +137,26 @@ script.
         return setWindData;
     }
 
-    barChart.series[0].setData(setBarChart());              // set BarChart (7 graph -> content name, windSpeed, drilldownName)
+    setTimeout(function () {                                                        // cuz when user use the drilldown, if the data has updated, the error would be happened.
+        updateBarChart();
+    }, 2000);
+
+    const updateBarChart = () => {
+        $.ajax({
+            data: {},
+            type: 'get',
+            dataType: 'json',
+            url: '/windBarChart/api/update',
+            contentType: 'application/json',
+            success: (result) => {
+                // result = JSON.parse(result);                                        // data receive as String so I transfer that to JSON type
+                const chartUpdateForDay = barChart.series[0];
+                const drilldownOfChartUpdate = barChart.drilldown.series;
+
+                chartUpdateForDay.setData(setBarChart(result));                      // set BarChart (7 graph -> content name, windSpeed, drilldownName)
+            },
+            error: (err) => {
+                console.log(err);
+            }
+        })
+    }

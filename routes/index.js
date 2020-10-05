@@ -20,7 +20,7 @@ router.get('/', function(req, res, next) {
   const dayWindQuery = `
     SELECT ROUND(AVG(windSpeed), 2) AS windSpeed,  SUBSTR(rgst_dt, 6, 5) AS rgst_dt
     FROM finedust_tb
-    WHERE day(now()) >= day(rgst_dt)
+    WHERE now() >= rgst_dt
     GROUP BY LEFT(rgst_dt, 10)
     order by rgst_dt desc
   `;
@@ -28,7 +28,7 @@ router.get('/', function(req, res, next) {
   const timeWindQueryForLast6daysQuery = `
     SELECT ROUND(AVG(windSpeed), 2) AS windSpeed
     FROM finedust_tb
-    WHERE SUBSTR(rgst_dt, 12, 2) % 2 = 0 AND day(now()) > day(rgst_dt)
+    WHERE SUBSTR(rgst_dt, 12, 2) % 2 = 0 AND now() > rgst_dt
     GROUP BY LEFT(rgst_dt, 13)
     order by rgst_dt desc
     LIMIT 72
@@ -75,7 +75,7 @@ router.get('/', function(req, res, next) {
 
   connection.query(tableQuery(req.query), (err, rows, fields) => {
     if (!err) {
-      res.render('index', {'datas': rows.map(data => {
+      res.render('index', {'datasOfTable': rows.map(data => {
           return {
             windDirection: data.windDirection,
             windSpeed: data.windSpeed,

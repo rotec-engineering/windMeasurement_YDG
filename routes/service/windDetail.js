@@ -35,7 +35,7 @@ const conditionQuery = (req_Obj) => {
 }
 const tableQuery = (req_Obj, data) => {
     let query;
-    if(data == 1) {
+    if(data === 1) {
         query = ``;
     } else {
         query = conditionQuery(req_Obj);
@@ -56,10 +56,10 @@ const tableQuery = (req_Obj, data) => {
 }
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-    connection.query(tableQuery(req.query, 1), (err, rows, fields) => {
+router.get('/', function(req, res) {
+    connection.query(tableQuery(req.query, 1), (err, rows) => {
         if (!err) {
-            res.render('home/windDetail', {'datas': rows.map(data => {
+            res.render('home/windDetail', {'datasOfTable': rows.map(data => {
                     return {
                         windDirection: data.windDirection,
                         windSpeed: data.windSpeed,
@@ -76,10 +76,10 @@ router.get('/', function(req, res, next) {
         }
     })
 });
-router.get('/api/search', (req, res, next) => {
-    connection.query(tableQuery(req.query, 0), (err, rows, fields) => {
+router.get('/api/search', (req, res) => {
+    connection.query(tableQuery(req.query, 0), (err, rows) => {
         if (!err) {
-            let result;
+            let result = null;
 
             rows.forEach(data => {
                 const html = `
