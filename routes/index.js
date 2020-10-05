@@ -3,7 +3,7 @@ const router = express.Router();
 const moment = require('moment');
 const connection = require("../routes/connection");
 
-const tableQuery = (req_Obj) => {
+const tableQuery = () => {
   return `
     SELECT AVG(windDirection) AS windDirection,
            ROUND(AVG(substr(windSpeed, 1, 3)), 2) AS windSpeed,
@@ -16,7 +16,7 @@ const tableQuery = (req_Obj) => {
 }
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
   const dayWindQuery = `
     SELECT ROUND(AVG(windSpeed), 2) AS windSpeed,  SUBSTR(rgst_dt, 6, 5) AS rgst_dt
     FROM finedust_tb
@@ -43,19 +43,16 @@ router.get('/', function(req, res, next) {
 
   let dayWindData, timeWindDataFor6days, timeWindDataForLastDay;
 
-  connection.query(dayWindQuery, function (err, rows, fields) {
+  connection.query(dayWindQuery, function (err, rows) {
     if(!err) {
       dayWindData = rows;
-      // res.render('index', {
-      //   'dayWindData': rows
-      // });
     } else {
       console.log('dayWindData send Err' + err);
       res.render('index', err);
     }
   })
 
-  connection.query(timeWindQueryForLast6daysQuery, function (err, rows, fields) {
+  connection.query(timeWindQueryForLast6daysQuery, function (err, rows) {
     if(!err) {
       timeWindDataFor6days = rows;
     } else {
@@ -64,7 +61,7 @@ router.get('/', function(req, res, next) {
     }
   })
 
-  connection.query(timeWindDataForLastDayQuery, function (err, rows, fields) {
+  connection.query(timeWindDataForLastDayQuery, function (err, rows) {
     if(!err) {
       timeWindDataForLastDay = rows;
     } else {
@@ -73,7 +70,7 @@ router.get('/', function(req, res, next) {
     }
   })
 
-  connection.query(tableQuery(req.query), (err, rows, fields) => {
+  connection.query(tableQuery(req.query), (err, rows) => {
     if (!err) {
       res.render('index', {'datasOfTable': rows.map(data => {
           return {

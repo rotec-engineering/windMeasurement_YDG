@@ -40,7 +40,7 @@ block content
         }
 
         const selectFrom = (e) => {
-            if (e.value != 'custom') {
+            if (e.value !== 'custom') {
                 document.getElementsByName("startDate")[0].disabled = true;
                 document.getElementsByName("startTime")[0].disabled = true;
                 document.getElementsByName("endDate")[0].disabled = true;
@@ -52,27 +52,27 @@ block content
                 document.getElementsByName("endTime")[0].disabled = false;
             }
 
-            if (e.value == 'year') {
+            if (e.value === 'year') {
                 document.getElementsByName("selectYear")[0].style.display = 'inline';
             } else {
                 document.getElementsByName("selectYear")[0].style.display = 'none';
             }
 
-            if (e.value == 'quarter') {
+            if (e.value === 'quarter') {
                 document.getElementsByName("selectYear")[0].style.display = 'inline';
                 document.getElementsByName("selectQuarter")[0].style.display = 'inline';
             } else {
                 document.getElementsByName("selectQuarter")[0].style.display = 'none';
             }
 
-            if (e.value == 'month') {
+            if (e.value === 'month') {
                 document.getElementsByName("selectYear")[0].style.display = 'inline';
                 document.getElementsByName("selectMonth")[0].style.display = 'inline';
             } else {
                 document.getElementsByName("selectMonth")[0].style.display = 'none';
             }
 
-            if (e.value == 'week') {
+            if (e.value === 'week') {
                 document.getElementsByName("selectYear")[0].style.display = 'inline';
                 document.getElementsByName("selectWeek")[0].style.display = 'inline';
                 document.getElementsByName("selectMonth")[0].style.display = 'inline';

@@ -151,7 +151,6 @@ script.
             success: (result) => {
                 // result = JSON.parse(result);                                        // data receive as String so I transfer that to JSON type
                 const chartUpdateForDay = barChart.series[0];
-                const drilldownOfChartUpdate = barChart.drilldown.series;
 
                 chartUpdateForDay.setData(setBarChart(result));                      // set BarChart (7 graph -> content name, windSpeed, drilldownName)
             },

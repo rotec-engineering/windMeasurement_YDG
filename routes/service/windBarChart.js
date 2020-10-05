@@ -6,7 +6,7 @@ const connection = require("../connection");
 //     res.render('realtimeWindData', "success");
 // });
 
-router.get('/api/update', function(req, res, next) {
+router.get('/api/update', function(req, res) {
     const dayWindQuery = `
     SELECT ROUND(AVG(windSpeed), 2) AS windSpeed,  SUBSTR(rgst_dt, 6, 5) AS rgst_dt
     FROM finedust_tb
@@ -15,7 +15,7 @@ router.get('/api/update', function(req, res, next) {
     ORDER BY rgst_dt DESC
   `;
 
-    connection.query(dayWindQuery, function (err, rows, fields) {
+    connection.query(dayWindQuery, function (err, rows) {
         if(!err) {
             const dayWindData = rows;
             res.send(dayWindData);
