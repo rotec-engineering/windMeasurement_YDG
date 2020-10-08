@@ -1,17 +1,20 @@
-table#windInfo(style="width: 100%")
-    thead
+table#windInfo(style="margin-top: 8%; margin-left: auto; margin-right: auto; width: 85%;")
+    thead(style="text-align: center; border: 2px solid #808080")
+        tr(style="font-size: 20px; background-color: #E2E2E2")
+            th(style="border: 2px solid #808080") 현재 풍향
+            //th
+            th(style="border: 2px solid #808080") 현재 풍속
         tr
-            th#image(style="text-align: center")
+            th#image(style="width: 50%; border: 2px solid #808080")
                 img.wind-direction-icon(src="images/arrow-icon.png", alt="wind-direction" style={
-                    width: '270px',
+                    width: '240px',
                     transform: `rotate(${datasOfTable[0].windDirection}deg)`
                 })
-            th(style="width: 50%")
+            //th(style="width: 10%;")
+            th(style="width: 50%; border: 2px solid #808080")
                 figure.highcharts-windSpeedFigure
                     #container-windSpeed
-        tr(style="font-size: 20px; text-align: center")
-            th 현재 풍향
-            th 현재 풍속
+
 
 script.
     let windSpeedOptions = {
