@@ -1,28 +1,24 @@
-table#windInfo
+table#windInfo(style="width: 100%")
     thead
-        tr(style="margin-left: 10%; align: center")
-            th#image(style="width: 50%" colspan='1')
+        tr
+            th#image(style="text-align: center")
                 img.wind-direction-icon(src="images/arrow-icon.png", alt="wind-direction" style={
-                    width: '250px',
+                    width: '270px',
                     transform: `rotate(${datasOfTable[0].windDirection}deg)`
                 })
-            th(style="width: 50%;")
-                figure.highcharts-figure
-                  #container-speed.chart-container
-        tr
-            th
-                p(style="font-size: 20px; text-align: center") 현재 풍향
-            th
-                p(style="width: 30%; font-size: 20px; text-align: right") 현재 풍속
+            th(style="width: 50%")
+                figure.highcharts-windSpeedFigure
+                    #container-windSpeed
+        tr(style="font-size: 20px; text-align: center")
+            th 현재 풍향
+            th 현재 풍속
 
 script.
-    var gaugeOptions = {
+    let windSpeedOptions = {
         chart: {
             type: 'solidgauge'
         },
-
         title: null,
-
         pane: {
             center: ['50%', '85%'],
             size: '140%',
@@ -36,21 +32,17 @@ script.
                 shape: 'arc'
             }
         },
-
         exporting: {
             enabled: false
         },
-
         tooltip: {
             enabled: false
         },
-
-        // the value axis
-        yAxis: {
+        yAxis: {                    // the value axis
             stops: [
-                [0.1, '#55BF3B'], // green
-                [0.5, '#DDDF0D'], // yellow
-                [0.9, '#DF5353'] // red
+                [0.1, '#55BF3B'],   // green
+                [0.5, '#DDDF0D'],   // yellow
+                [0.9, '#DF5353']    // red
             ],
             lineWidth: 0,
             tickWidth: 0,
@@ -63,7 +55,6 @@ script.
                 y: 16
             }
         },
-
         plotOptions: {
             solidgauge: {
                 dataLabels: {
@@ -76,7 +67,7 @@ script.
     };
 
     // The wind speed
-    var chartSpeed = Highcharts.chart('container-speed', Highcharts.merge(gaugeOptions, {
+    let chartSpeed = Highcharts.chart('container-windSpeed', Highcharts.merge(windSpeedOptions, {
         yAxis: {
             min: 0,
             max: 60,
@@ -84,11 +75,9 @@ script.
                 text: 'WindSpeed'
             }
         },
-
         credits: {
             enabled: false
         },
-
         series: [{
             name: 'WindSpeed',
             data: [60],
@@ -100,30 +89,29 @@ script.
                     '</div>'
             },
             tooltip: {
-                valueSuffix: ' m/s'
+                valueSuffix: 'm/s'
             }
         }]
-
     }));
+
     setInterval(function () {
+        function setWindData() {
+            $.ajax({
+                data: {},
+                type: 'get',
+                dataType: 'html',
+                url: '/realtimeWindData/api/search',
+                contentType: 'application/json',
+                success: (result) => {
+                    const point = chartSpeed.series[0].points[0];
+                    const newVal = result * 1;
+
+                    point.update(newVal);
+                },
+                error: (err) => {
+                    console.log(err);
+                }
+            })
+        }
         setWindData();
     }, 3000);
-
-    const setWindData = () => {
-    $.ajax({
-    data: {},
-        type: 'get',
-        dataType: 'html',
-        url: '/realtimeWindData/api/search',
-        contentType: 'application/json',
-        success: (result) => {
-            const point = chartSpeed.series[0].points[0];
-            const newVal = result * 1;
-
-            point.update(newVal);
-            },
-        error: (err) => {
-            console.log(err);
-            }
-        })
-    }
