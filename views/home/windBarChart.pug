@@ -1,4 +1,4 @@
-figure.highcharts-figure
+figure.highcharts-windBarFigure
     #container
 
 script.
@@ -40,7 +40,9 @@ script.
             title: {
                 text: 'WindSpeed (m/s)'
             }
-
+        },
+        credits: {                                                      // remove the "highcharts" mark at bottom of the chart
+            enabled: false
         },
         legend: {
             enabled: false
@@ -152,7 +154,7 @@ script.
         return setWindData;
     }
 
-    setTimeout(function () {                                                            // cuz when user use the drilldown, if the data has updated, the error would be happened.
+    setTimeout(function () {                                                            // not setInterval cuz when user use the drilldown, if the data has updated, the error would be happened.
         updateBarChart();
         function updateBarChart() {
             $.ajax({
@@ -164,7 +166,6 @@ script.
                 success: (result) => {
                     const chartUpdateForDay = barChart.series[0];
                     chartUpdateForDay.setData(setBarChart(result));                      // set BarChart (7 graph -> content name, windSpeed, drilldownName)
-
                 },
                 error: (err) => {
                     console.log(err);
