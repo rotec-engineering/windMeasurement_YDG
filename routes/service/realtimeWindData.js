@@ -2,10 +2,6 @@ const express = require('express');
 const router = express.Router();
 const connection = require("../connection");
 
-// router.get('/', function(req, res, next) {
-//     res.render('realtimeWindData', "success");
-// });
-
 router.get('/api/search', function(req, res, next) {
     const todayWindSpeedSearchQuery = `
     SELECT SUBSTR(windSpeed, 1, 3) AS windSpeed

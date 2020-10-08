@@ -2,10 +2,6 @@ const express = require('express');
 const router = express.Router();
 const connection = require("../connection");
 
-// router.get('/', function(req, res, next) {
-//     res.render('realtimeWindData', "success");
-// });
-
 router.get('/api/update', function(req, res) {
     const dayWindQuery = `
     SELECT ROUND(AVG(windSpeed), 2) AS windSpeed,  SUBSTR(rgst_dt, 6, 5) AS rgst_dt
@@ -19,14 +15,11 @@ router.get('/api/update', function(req, res) {
         if(!err) {
             const dayWindData = rows;
             res.send(dayWindData);
-
         } else {
             console.log('dayWindData send Err' + err);
             res.send(err);
         }
     })
-
-
 })
 
 module.exports = router;
