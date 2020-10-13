@@ -1,6 +1,36 @@
 extends ../layout
 
 block content
+    script.
+        const selectDevice = (e) => {
+            if(e.value === 'customOption') {
+                document.getElementsByName("customInput")[0].style.display = 'inline';
+            }
+            else {
+                document.getElementsByName("customInput")[0].style.display = 'none';
+            }
+            console.log('e.value => ' + e.value)
+            showDeviceInfo(e.value);
+        }
+
+        function showDeviceInfo(deviceId) {
+            $.ajax({
+                data: {
+                    'deviceId': deviceId
+                },
+                type: 'get',
+                dataType: 'html',
+                url: "/deviceRegister/api/search",
+                contentType: 'application/json',
+                success: (result) => {
+                    $("#deviceInfo").html(result);
+                },
+                error: (err) => {
+                    console.log(err)
+                }
+            })
+        }
+
     //#diviceContainer
     .row(style="width: 50%; margin-left: auto; margin-right: auto; margin-top: 5%")
         p#pageTitle(style="font-size: 40px; text-align: center; width: 50%; margin-left: auto; margin-right: auto") 장치 등록
@@ -17,11 +47,15 @@ block content
                 tr
                     th(style="width: 30%; border: 1px solid") 장치 타입
                     td(style="width: 70%; border: 1px solid")
-                        select#selectDevice(name="deviceName" style="width: 100%" onchange="")
+                        select#selectDevice(name="deviceName" style="width: 100%; text-align: center" onchange="selectDevice(this)")
+                            -for (let i = 0; i < deviceData.length; i++)
+                                option(value = `${deviceData[i].deviceId}`) #{deviceData[i].deviceType}
+                            option(value = 'customOption') 사용자 입력
+                        input(type="text" name="customInput" style="display: none; width: 100%")
                 tr
                     th(style="width: 30%; border: 1px solid") 등록 일
                     td(style="width: 70%; border: 1px solid")
-                        input(type="text" disabled = true style="width: 100%" value="2020-10-22")
+                        input(type="text" disabled = true style="width: 100%" value=`${currentTime}`)
 
     .row
         table#buttonTable(style="text-align: center; margin-top: 1%; margin-left: auto; margin-right: auto; width: 20%")
