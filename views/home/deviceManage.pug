@@ -1,6 +1,30 @@
 extends ../layout
 //
 block content
+    script.
+        const selectDevice = (e) => {
+            console.log('e.value => ' + e.value)
+            showDeviceInfo(e.value);
+        }
+
+        function showDeviceInfo(deviceId) {
+            $.ajax({
+                data: {
+                    'deviceId': deviceId
+                },
+                type: 'get',
+                dataType: 'html',
+                url: "/deviceManage/api/search",
+                contentType: 'application/json',
+                success: (result) => {
+                    $("#deviceInfo").html(result);
+                },
+                error: (err) => {
+                    console.log(err)
+                }
+            })
+        }
+
     //#diviceContainer
     .row(style="width: 50%; margin-left: auto; margin-right: auto; margin-top: 5%")
         p#pageTitle(style="font-size: 40px; text-align: center; width: 50%; margin-left: auto; margin-right: auto") 장치 목록
