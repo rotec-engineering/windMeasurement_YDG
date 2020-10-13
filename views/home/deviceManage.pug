@@ -1,5 +1,5 @@
 extends ../layout
-//
+
 block content
     script.
         const selectDevice = (e) => {
@@ -49,3 +49,15 @@ block content
                 tr
                     th(style="width: 30%; border: 1px solid") 수정 일
                     td(style="width: 70%; border: 1px solid") #{dataOfTable[0].modifyDate}
+
+    .row
+        table#buttonTable(style="text-align: center; margin-top: 1%; margin-left: auto; margin-right: auto; width: 20%")
+            tr
+                td
+                    button(onClick='location.href = "/deviceRegister"' class='btn btn-dark mr-2' style="width: 90%") 장치 등록
+            tr
+                td
+                    button(onClick='' class='btn btn-dark mr-2' style="width: 90%") 장치 정보 수정
+            tr
+                td
+                    button(onClick='' class='btn btn-dark mr-2' style="width: 90%") 현재 장치 삭제
