@@ -1,6 +1,8 @@
 extends ../layout
 
 block content
+    link(rel='stylesheet', href='/stylesheets/deviceTable.css')
+
     script.
         const selectDevice = (e) => {
             if(e.value === 'customOption') {                                                // display the input function
@@ -10,7 +12,6 @@ block content
                 document.getElementsByName("customInput")[0].style.display = 'none';
             }
             console.log('e.value => ' + e.value)
-            // registerDevice();
         }
 
         function registerDevice() {
@@ -44,33 +45,33 @@ block content
         }
 
     //#diviceContainer
-    .row(style="width: 50%; margin-left: auto; margin-right: auto; margin-top: 5%")
-        p#pageTitle(style="font-size: 40px; text-align: center; width: 50%; margin-left: auto; margin-right: auto") 장치 등록
+    .row#deviceContatiner
+        p#pageTitle 장치 등록
     .row#showTable
-        table#showInfo(style="text-align: center; border: 2px solid; margin-left: auto; margin-right: auto; width: 20%")
-            thead#deviceName(style="text-align: center; border: 1px solid")
+        table#showInfo
+            thead#deviceName
                 tr
-                    th(style="width: 30%; border: 1px solid") 장치 명
-                    td(style="width: 70%; border: 1px solid")
+                    th 장치 명
+                    td
                         input(type="text" style="width: 100%" name="deviceName")
-            tbody#deviceInfo(style="text-align: center; border: 1px solid")
+            tbody#deviceInfo
                 tr
-                    td#deviceImg(colspan="2" style="border: 2px solid; height: 300px") 이미지
+                    td#deviceImg(colspan="2") 이미지
                 tr
-                    th(style="width: 30%; border: 1px solid") 장치 타입
-                    td(style="width: 70%; border: 1px solid")
+                    th 장치 타입
+                    td
                         select#selectDevice(name="deviceOptions" style="width: 100%; text-align: center" onchange="selectDevice(this)")
                             -for (let i = 0; i < deviceData.length; i++)
                                 option(value = `${deviceData[i].deviceType}`) #{deviceData[i].deviceType}
                             option(value = 'customOption') 사용자 입력
                         input#customInput(type="text" name="customInput" style="display: none; width: 100%")
                 tr
-                    th(style="width: 30%; border: 1px solid") 등록 일
-                    td(style="width: 70%; border: 1px solid")
+                    th 등록 일
+                    td
                         input(type="text" disabled = true style="width: 100%" value=`${currentTime}`)
 
     .row
-        table#buttonTable(style="text-align: center; margin-top: 1%; margin-left: auto; margin-right: auto; width: 20%")
+        table#buttonTable
             tr
                 td(colspan="2")
                     button(onClick='registerDevice()' class='btn btn-dark mr-2' style="width: 90%") 장치 등록

@@ -1,0 +1,66 @@
+#deviceContatiner {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5%;
+}
+#deviceContatiner #pageTitle {
+    font-size: 40px;
+    text-align: center;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#showTable #showInfo {
+    text-align: center;
+    border: 2px solid;
+    width: 20%;
+    margin-left: auto;
+    margin-right: auto;
+}
+#showTable #showInfo #deviceName {
+    text-align: center;
+    border: 1px solid;
+}
+#showTable #showInfo #deviceName tr th {
+    width: 30%;
+    border: 1px solid;
+}
+#showTable #showInfo #deviceName tr td {
+    width: 30%;
+    border: 1px solid;
+}
+#showTable #showInfo #deviceName tr td input {
+    width: 30%;
+    border: 1px solid;
+}
+#showTable #showInfo #deviceName #selectDevice {
+    width: 100%;
+}
+
+#showTable #showInfo #deviceInfo {
+    text-align: center;
+    border: 1px solid;
+}
+#showTable #showInfo #deviceInfo tr #deviceImg {
+    border: 2px solid;
+    height: 300px;
+}
+#showTable #showInfo #deviceInfo tr th {
+    width: 30%;
+    border: 1px solid;
+}
+#showTable #showInfo #deviceInfo tr td {
+    width: 70%;
+    border: 1px solid;
+}
+
+#buttonTable {
+    text-align: center;
+    margin-top: 1%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 20%;
+}
+
