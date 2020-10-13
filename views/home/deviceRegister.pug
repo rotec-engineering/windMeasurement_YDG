@@ -1,0 +1,33 @@
+extends ../layout
+
+block content
+    //#diviceContainer
+    .row(style="width: 50%; margin-left: auto; margin-right: auto; margin-top: 5%")
+        p#pageTitle(style="font-size: 40px; text-align: center; width: 50%; margin-left: auto; margin-right: auto") 장치 등록
+    .row#showTable
+        table#showInfo(style="text-align: center; border: 2px solid; margin-left: auto; margin-right: auto; width: 20%")
+            thead#deviceName(style="text-align: center; border: 1px solid")
+                tr
+                    th(style="width: 30%; border: 1px solid") 장치 명
+                    td(style="width: 70%; border: 1px solid")
+                        input(type="text" style="width: 100%")
+            tbody#deviceInfo(style="text-align: center; border: 1px solid")
+                tr
+                    td#deviceImg(colspan="2" style="border: 2px solid; height: 300px") 이미지
+                tr
+                    th(style="width: 30%; border: 1px solid") 장치 타입
+                    td(style="width: 70%; border: 1px solid")
+                        select#selectDevice(name="deviceName" style="width: 100%" onchange="")
+                tr
+                    th(style="width: 30%; border: 1px solid") 등록 일
+                    td(style="width: 70%; border: 1px solid")
+                        input(type="text" disabled = true style="width: 100%" value="2020-10-22")
+
+    .row
+        table#buttonTable(style="text-align: center; margin-top: 1%; margin-left: auto; margin-right: auto; width: 20%")
+            tr
+                td(colspan="2")
+                    button(onClick='' class='btn btn-dark mr-2' style="width: 90%") 장치 등록
+            tr
+                td(colspan="2")
+                    button(onClick='location.href = "/deviceManage"' class='btn btn-dark mr-2' style="width: 90%") 뒤로 가기
