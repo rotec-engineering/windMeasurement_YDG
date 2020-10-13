@@ -27,8 +27,31 @@ block content
         }
 
         function goToDeviceUpdate() {
-            // console.log('$("select[name= deviceOptions]").val()' + $("select[name=deviceName]").val());
             location.href = '/deviceUpdate?deviceId=' + $("select[name=deviceName]").val();
+        }
+
+        function deleteDevice() {
+            let delConfirm = confirm("장치를 정말 삭제 하시겠습니까?");
+            if (!delConfirm)
+                return 0;
+
+            $.ajax({
+                data: {
+                    'deviceId': $("select[name=deviceName]").val()
+                },
+                type: 'get',
+                dataType: 'html',
+                url: "/deviceManage/api/delete",
+                contentType: 'application/json',
+                success: (result) => {
+                    console.log(result);
+                    alert("등록된 장치를 삭제 했습니다.");
+                    location.reload();
+                },
+                error: (err) => {
+                    console.log(err)
+                }
+            })
         }
 
     //#diviceContainer
@@ -66,4 +89,4 @@ block content
                     button(onClick='goToDeviceUpdate()' class='btn btn-dark mr-2' style="width: 90%") 장치 정보 수정
             tr
                 td
-                    button(onClick='' class='btn btn-dark mr-2' style="width: 90%") 현재 장치 삭제
+                    button(onClick='deleteDevice()' class='btn btn-dark mr-2' style="width: 90%") 현재 장치 삭제

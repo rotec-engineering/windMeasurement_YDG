@@ -62,4 +62,23 @@ router.get('/api/search', (req, res) => {
     })
 })
 
+router.get('/api/delete', (req, res) => {
+    const param = req.query;
+    console.log(param.deviceId);
+    const deviceDeleteQuery = `
+    DELETE 
+    FROM finedust.device_manage
+    WHERE deviceId = ${param.deviceId}
+    `
+    connection.query(deviceDeleteQuery, (err, rows) => {
+        if (!err) {
+            res.send("delete Success");
+        }
+        else {
+            console.log(err);
+            res.send(err);
+        }
+    })
+})
+
 module.exports = router;
