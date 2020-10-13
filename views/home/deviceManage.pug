@@ -5,7 +5,6 @@ block content
 
     script.
         const selectDevice = (e) => {
-            // console.log('e.value => ' + e.value)
             showDeviceInfo(e.value);
         }
 
@@ -25,6 +24,11 @@ block content
                     console.log(err)
                 }
             })
+        }
+
+        function goToDeviceUpdate() {
+            // console.log('$("select[name= deviceOptions]").val()' + $("select[name=deviceName]").val());
+            location.href = '/deviceUpdate?deviceId=' + $("select[name=deviceName]").val();
         }
 
     //#diviceContainer
@@ -59,7 +63,7 @@ block content
                     button(onClick='location.href = "/deviceRegister"' class='btn btn-dark mr-2' style="width: 90%") 장치 등록
             tr
                 td
-                    button(onClick='' class='btn btn-dark mr-2' style="width: 90%") 장치 정보 수정
+                    button(onClick='goToDeviceUpdate()' class='btn btn-dark mr-2' style="width: 90%") 장치 정보 수정
             tr
                 td
                     button(onClick='' class='btn btn-dark mr-2' style="width: 90%") 현재 장치 삭제
