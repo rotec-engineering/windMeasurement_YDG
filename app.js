@@ -12,6 +12,7 @@ const realtimeWindDataRouter = require('./routes/service/realtimeWindData');
 const windDetailRouter = require('./routes/service/windDetail');
 const deviceManageRouter = require('./routes/service/deviceManage');
 const deviceRegisterRouter = require('./routes/service/deviceRegister');
+const deviceUpdateRouter = require('./routes/service/deviceUpdate');
 
 const app = express();
 const config = require('./config.json')[app.get('env')];
@@ -37,6 +38,7 @@ app.use('/realtimeWindData', realtimeWindDataRouter);
 app.use('/windDetail', windDetailRouter);
 app.use('/deviceManage', deviceManageRouter);
 app.use('/deviceRegister', deviceRegisterRouter);
+app.use('/deviceUpdate', deviceUpdateRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
