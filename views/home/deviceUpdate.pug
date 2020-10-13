@@ -13,7 +13,7 @@ block content
         }
 
         function updateDevice() {
-            let result = confirm("장치를 수정 하시겠습니까?")
+            let result = confirm("장치를 수정 하시겠습니까?");
             if (!result)
                 return 0;
 
@@ -36,7 +36,7 @@ block content
                 url: "/deviceUpdate/api/update",
                 contentType: 'application/json',
                 success: (result) => {
-                    console.log(result)
+                    console.log(result);
                     alert("장치를 수정했습니다.");
                     location.href = "/deviceManage";
                 },
