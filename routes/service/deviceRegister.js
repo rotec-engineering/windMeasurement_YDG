@@ -14,7 +14,7 @@ router.get('/', function(req, res) {
     const getDeviceTypeQuery = `
     SELECT distinct deviceType, deviceId
     FROM finedust.device_manage
-    GROUP BY deviceType, deviceId
+    GROUP BY deviceType
     `
 
     connection.query(getDeviceTypeQuery, function (err, rows) {
@@ -29,5 +29,23 @@ router.get('/', function(req, res) {
         }
     })
 });
+
+router.get('/api/register', (req, res) => {
+    const param = req.query;
+    const registerQuery = `
+    INSERT INTO finedust.device_manage (deviceName, deviceType)
+    VALUES ("${param.deviceName}", "${param.deviceType}")
+    `
+
+    connection.query(registerQuery, (err, rows) => {
+        if (!err) {
+            res.send("data registration success");
+        }
+        else {
+            console.log(err);
+            res.send(err);
+        }
+    })
+})
 
 module.exports = router;
