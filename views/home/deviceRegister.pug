@@ -15,6 +15,10 @@ block content
         }
 
         function registerDevice() {
+            let result = confirm("장치를 등록 하시겠습니까?")
+            if(!result)
+                return 0;
+
             let deviceType;
             if($("select[name= deviceOptions]").val() === "customOption") {
                 deviceType = $("#customInput").val();
@@ -35,8 +39,8 @@ block content
                 contentType: 'application/json',
                 success: (result) => {
                     console.log(result)
-                    // 등록 완료 팝업창 띄우기
-                    // 디바이스 매니지 페이지로 이동
+                    alert("장치를 등록했습니다.");
+                    location.href = "/deviceManage";
                 },
                 error: (err) => {
                     console.log(err)
