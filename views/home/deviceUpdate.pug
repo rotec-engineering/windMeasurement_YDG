@@ -1,0 +1,56 @@
+extends ../layout
+
+block content
+    link(rel='stylesheet', href='/stylesheets/deviceTable.css')
+
+    script.
+        const selectDevice = (e) => {
+            if (e.value === 'customOption') {                                                // display the input function
+                document.getElementsByName("customInput")[0].style.display = 'inline';
+            } else {
+                document.getElementsByName("customInput")[0].style.display = 'none';
+            }
+            console.log('e.value => ' + e.value)
+        }
+
+        function updateDevice() {
+            let result = confirm("장치를 수정 하시겠습니까?")
+            if (!result)
+                return 0;
+        }
+
+
+    //#diviceContainer
+    .row#deviceContatiner
+        p#pageTitle 장치 수정
+    .row#showTable
+        table#showInfo
+            thead#deviceName
+                tr
+                    th 장치 명
+                    td
+                        input(type="text" style="width: 100%" name="deviceName" value=`${deviceInfo[0].deviceName}`)
+            tbody#deviceInfo
+                tr
+                    td#deviceImg(colspan="2") 이미지
+                tr
+                    th 장치 타입
+                    td
+                        select#selectDevice(name="deviceOptions" style="width: 100%; text-align: center" onchange="selectDevice(this)")
+                            -for (let i = 0; i < deviceData.length; i++)
+                                option(value = `${deviceData[i].deviceType}`) #{deviceData[i].deviceType}
+                            option(value = 'customOption') 사용자 입력
+                        input#customInput(type="text" name="customInput" style="display: none; width: 100%")
+                tr
+                    th 등록 일
+                    td
+                        input(type="text" disabled = true style="width: 100%" value=`${deviceInfo[0].registerDate}`)
+
+    .row
+        table#buttonTable
+            tr
+                td(colspan="2")
+                    button(onClick='updateDevice()' class='btn btn-dark mr-2' style="width: 90%") 장치 수정
+            tr
+                td(colspan="2")
+                    button(onClick='location.href = "/deviceManage"' class='btn btn-dark mr-2' style="width: 90%") 뒤로 가기
