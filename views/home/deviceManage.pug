@@ -1,0 +1,27 @@
+extends ../layout
+//
+block content
+    //#diviceContainer
+    .row(style="width: 50%; margin-left: auto; margin-right: auto; margin-top: 5%")
+        p#pageTitle(style="font-size: 40px; text-align: center; width: 50%; margin-left: auto; margin-right: auto") 장치 목록
+
+    .row#showTable
+        table#showInfo(style="text-align: center; border: 2px solid; margin-left: auto; margin-right: auto; width: 20%")
+            thead#deviceName(style="text-align: center; border: 1px solid")
+                tr
+                    th(colspan="2")
+                        select#selectDevice(name="deviceName" style="width: 100%")
+                            option(value = `test`) test
+            tbody#deviceInfo(style="text-align: center; border: 1px solid")
+                tr
+                    td#deviceImg(colspan="2" style="border: 2px solid; height: 300px") 이미지
+                tr
+                    th(style="width: 30%; border: 1px solid") 장치 타입
+                    td(style="width: 70%; border: 1px solid") 풍향/풍속
+                tr
+                    th(style="width: 30%; border: 1px solid") 등록 일
+                    td(style="width: 70%; border: 1px solid") 2020-10-11
+                tr
+                    th(style="width: 30%; border: 1px solid") 수정 일
+                    td(style="width: 70%; border: 1px solid") 2020-10-12
+
