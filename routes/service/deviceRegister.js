@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-// const moment = require('moment');
 const connection = require("../connection");
 
-/* GET home page. */
 function currentTime() {
     let date = new Date();
     let current = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
 
     return current;
 }
+
+/* GET home page. */
 router.get('/', function(req, res) {
     const getDeviceTypeQuery = `
     SELECT distinct deviceType, deviceId

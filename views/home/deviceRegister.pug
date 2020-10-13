@@ -11,7 +11,6 @@ block content
             else {
                 document.getElementsByName("customInput")[0].style.display = 'none';
             }
-            console.log('e.value => ' + e.value)
         }
 
         function registerDevice() {
@@ -22,11 +21,11 @@ block content
             let deviceType;
             if($("select[name= deviceOptions]").val() === "customOption") {
                 deviceType = $("#customInput").val();
-                console.log("deviceType => " + deviceType);
             }
             else {
                 deviceType =$("select[name= deviceOptions]").val();
             }
+
             $.ajax({
                 data: {
                     'deviceName': $("input[name= deviceName]").val(),
@@ -65,10 +64,10 @@ block content
                     th 장치 타입
                     td
                         select#selectDevice(name="deviceOptions" style="width: 100%; text-align: center" onchange="selectDevice(this)")
+                            option(value = 'customOption') 사용자 입력
                             -for (let i = 0; i < deviceData.length; i++)
                                 option(value = `${deviceData[i].deviceType}`) #{deviceData[i].deviceType}
-                            option(value = 'customOption') 사용자 입력
-                        input#customInput(type="text" name="customInput" style="display: none; width: 100%")
+                        input#customInput(type="text" name="customInput" style="width: 100%")
                 tr
                     th 등록 일
                     td
