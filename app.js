@@ -10,6 +10,8 @@ const usersRouter = require('./routes/users');
 const windBarChartRouter = require('./routes/service/windBarChart');
 const realtimeWindDataRouter = require('./routes/service/realtimeWindData');
 const windDetailRouter = require('./routes/service/windDetail');
+const deviceManageRouter = require('./routes/service/deviceManage');
+const deviceRegisterRouter = require('./routes/service/deviceRegister');
 
 const app = express();
 const config = require('./config.json')[app.get('env')];
@@ -27,13 +29,14 @@ app.use(bodyParser.urlencoded({ extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/index', indexRouter);
 app.use('/windBarChart', windBarChartRouter);
 app.use('/realtimeWindData', realtimeWindDataRouter);
 app.use('/windDetail', windDetailRouter);
+app.use('/deviceManage', deviceManageRouter);
+app.use('/deviceRegister', deviceRegisterRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
