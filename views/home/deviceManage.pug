@@ -10,18 +10,18 @@ block content
             thead#deviceName(style="text-align: center; border: 1px solid")
                 tr
                     th(colspan="2")
-                        select#selectDevice(name="deviceName" style="width: 100%")
-                            option(value = `test`) test
+                        select#selectDevice(name="deviceName" style="width: 100%" onchange="selectDevice(this)")
+                          -for(let i = 0; i < dataOfTable.length; i++)
+                              option(value = `${dataOfTable[i].deviceId}`) #{dataOfTable[i].deviceName}
             tbody#deviceInfo(style="text-align: center; border: 1px solid")
                 tr
                     td#deviceImg(colspan="2" style="border: 2px solid; height: 300px") 이미지
                 tr
                     th(style="width: 30%; border: 1px solid") 장치 타입
-                    td(style="width: 70%; border: 1px solid") 풍향/풍속
+                    td(style="width: 70%; border: 1px solid") #{dataOfTable[0].deviceType}
                 tr
                     th(style="width: 30%; border: 1px solid") 등록 일
-                    td(style="width: 70%; border: 1px solid") 2020-10-11
+                    td(style="width: 70%; border: 1px solid") #{dataOfTable[0].registerDate}
                 tr
                     th(style="width: 30%; border: 1px solid") 수정 일
-                    td(style="width: 70%; border: 1px solid") 2020-10-12
-
+                    td(style="width: 70%; border: 1px solid") #{dataOfTable[0].modifyDate}

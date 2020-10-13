@@ -4,7 +4,22 @@ const connection = require("../connection");
 
 /* GET home page. */
 router.get('/', function(req, res) {
-    res.render('home/deviceManage')
+    const deviceSearchQuery = `
+    SELECT deviceName, LEFT(registerDate, 10) AS registerDate, LEFT(modifyDate, 10) AS modifyDate, deviceId, deviceType
+    FROM finedust.device_manage
+    ORDER BY deviceName
+    `;
+    connection.query(deviceSearchQuery, (err, rows) => {
+        if(!err) {
+            res.render('home/deviceManage', {
+                dataOfTable: rows
+            })
+        }
+        else {
+            console.log(err);
+            res.render('home/deviceManage', err);
+        }
+    })
 });
 
 module.exports = router;
