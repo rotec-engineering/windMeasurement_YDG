@@ -10,13 +10,40 @@ block content
             } else {
                 document.getElementsByName("customInput")[0].style.display = 'none';
             }
-            console.log('e.value => ' + e.value)
         }
 
         function updateDevice() {
             let result = confirm("장치를 수정 하시겠습니까?")
             if (!result)
                 return 0;
+
+            let deviceType;
+            if ($("select[name= deviceOptions]").val() === "customOption") {
+                deviceType = $("#customInput").val();
+            } else {
+                deviceType = $("select[name= deviceOptions]").val();
+            }
+
+            $.ajax({
+                data: {
+                    'deviceName': $("input[name= deviceName]").val(),
+                    'deviceType': deviceType,
+                    'deviceId': $('[name="deviceName"]').attr('id')
+                    // 'deviceImg':
+                },
+                type: 'get',
+                dataType: 'html',
+                url: "/deviceUpdate/api/update",
+                contentType: 'application/json',
+                success: (result) => {
+                    console.log(result)
+                    alert("장치를 수정했습니다.");
+                    location.href = "/deviceManage";
+                },
+                error: (err) => {
+                    console.log(err)
+                }
+            })
         }
 
 
@@ -29,7 +56,7 @@ block content
                 tr
                     th 장치 명
                     td
-                        input(type="text" style="width: 100%" name="deviceName" value=`${deviceInfo[0].deviceName}`)
+                        input(type="text" style="width: 100%" name="deviceName" value=`${deviceInfo[0].deviceName}` id=`${deviceInfo[0].deviceId}`)
             tbody#deviceInfo
                 tr
                     td#deviceImg(colspan="2") 이미지
@@ -37,10 +64,10 @@ block content
                     th 장치 타입
                     td
                         select#selectDevice(name="deviceOptions" style="width: 100%; text-align: center" onchange="selectDevice(this)")
+                            option(value = 'customOption') 사용자 입력
                             -for (let i = 0; i < deviceData.length; i++)
                                 option(value = `${deviceData[i].deviceType}`) #{deviceData[i].deviceType}
-                            option(value = 'customOption') 사용자 입력
-                        input#customInput(type="text" name="customInput" style="display: none; width: 100%")
+                        input#customInput(type="text" name="customInput" style="width: 100%" value=`${deviceInfo[0].deviceType}`)
                 tr
                     th 등록 일
                     td
