@@ -79,8 +79,8 @@ router.post('/api/imgUpload', uploader.single('deviceImg'), (req, res, next) => 
 
     connection.query(deviceImgSrcChangeQuery, function (err, rows) {
         const fileSrc = './public/images/deviceImg/';
-        const fileName = req.file.filename;                                                                             // if user didnt choose Img, the err would be happen
-        let deviceImgSrc = fileSrc + rows[0].deviceId + '_' + fileName;
+        const fileName = req.file === undefined ? '' : req.file.filename;                                                                             // if user didnt choose Img, the err would be happen
+        let deviceImgSrc = fileName === '' ? fileSrc + "notImg.jpg" : fileSrc + rows[0].deviceId + '_' + fileName;
 
         // kind of imgLoadStatus => 'uploading' & 'uploaded //
         const deviceImgSrcInsertQuery = `
@@ -89,11 +89,12 @@ router.post('/api/imgUpload', uploader.single('deviceImg'), (req, res, next) => 
         WHERE imgLoadStatus = 'uploading'
         `;
 
-        console.log("test1" + deviceImgSrc);
         if(!err) {
-            fs.rename(fileSrc + fileName, deviceImgSrc, function (err) {                 // file rename (if I need, I could divide ImgFolder follow with users)
-                if(err) throw err;
-            });
+            if(fileName !== '') {                                                                                       // not registered deviceImg
+                fs.rename(fileSrc + fileName, deviceImgSrc, function (err) {             // file rename (if I need, I could divide ImgFolder follow with users)
+                    if (err) throw err;
+                });
+            }
 
             connection.query(deviceImgSrcInsertQuery, function(err, rows) {                                             // insert new imgSrc
                 if (!err) {
