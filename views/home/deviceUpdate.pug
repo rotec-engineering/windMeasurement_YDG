@@ -37,6 +37,9 @@ block content
                 deviceType = $("select[name= deviceOptions]").val();
             }
 
+            let form = new FormData();                                                      // I used that when I control about ImgData
+            form.append("deviceImg", $("#deviceImgInput")[0].files[0]);
+
             $.ajax({
                 data: {
                     'deviceName': $("input[name= deviceName]").val(),
@@ -50,6 +53,21 @@ block content
                 contentType: 'application/json',
                 success: (result) => {
                     console.log(result);
+                },
+                error: (err) => {
+                    console.log(err)
+                }
+            })
+
+            $.ajax({                                                                        // register img src follow with deviceId
+                data: form,
+                type: 'post',
+                processData: false,
+                // contentType : false,
+                dataType: 'html',                   //multipart/form-data
+                url: "/deviceUpdate/api/imgUpload",
+                contentType: false,
+                success: (result) => {
                     alert("장치를 수정했습니다.");
                     location.href = "/deviceManage";
                 },
@@ -58,7 +76,6 @@ block content
                 }
             })
         }
-
 
     //#diviceContainer
     .row#deviceContatiner
