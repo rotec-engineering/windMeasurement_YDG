@@ -79,8 +79,8 @@ router.post('/api/imgUpload', uploader.single('deviceImg'), (req, res, next) => 
 
     connection.query(deviceImgSrcChangeQuery, function (err, rows) {
         const fileSrc = './public/images/deviceImg/';
-        const fileName = req.file === undefined ? '' : req.file.filename;                                                                             // if user didnt choose Img, the err would be happen
-        let deviceImgSrc = fileName === '' ? fileSrc + "notImg.jpg" : fileSrc + rows[0].deviceId + '_' + fileName;
+        const fileName = req.file === undefined ? '' : req.file.filename;                                               // if user didnt choose Img, the err would be happen
+        let deviceImgSrc = fileName === '' ? fileSrc + "notImg.jpg" : fileSrc + rows[0].deviceId + '_' + fileName;      // if user didnt choose Img
 
         // kind of imgLoadStatus => 'uploading' & 'uploaded //
         const deviceImgSrcInsertQuery = `
