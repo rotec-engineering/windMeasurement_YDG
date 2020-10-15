@@ -12,6 +12,19 @@ block content
             }
         }
 
+        function uploadImgPreview() {                                                       // display picture that customer pic
+            let fileInfo = document.getElementById("deviceImgInput").files[0];
+            let reader = new FileReader();
+
+            reader.onload = function () {
+                document.getElementById("deviceImgView").src = reader.result;
+            };
+
+            if (fileInfo) {
+                reader.readAsDataURL(fileInfo);
+            }
+        }
+
         function updateDevice() {
             let result = confirm("장치를 수정 하시겠습니까?");
             if (!result)
@@ -59,7 +72,11 @@ block content
                         input(type="text" style="width: 100%" name="deviceName" value=`${deviceInfo[0].deviceName}` id=`${deviceInfo[0].deviceId}`)
             tbody#deviceInfo
                 tr
-                    td#deviceImg(colspan="2") 이미지
+                    td#deviceImg(colspan="2")
+                        img#deviceImgView(src=`${deviceImgSrc}`)
+                tr
+                    td(colspan="2")
+                        input(type="file" id="deviceImgInput" name="deviceImgInput" style="width: 100%" accept="image/*" onchange="uploadImgPreview()")
                 tr
                     th 장치 타입
                     td

@@ -12,6 +12,7 @@ function currentTime() {
 /* GET home page. */
 router.get('/', function(req, res) {
     let deviceInfo;
+    let deviceImgSrc
     const param = req.query;
     const getDeviceTypeQuery = `
     SELECT distinct deviceType
@@ -19,19 +20,21 @@ router.get('/', function(req, res) {
     GROUP BY deviceType
     `;
     const getDeviceInfoQuery = `
-    SELECT deviceName, LEFT(registerDate, 10) AS registerDate, deviceId, deviceType
+    SELECT deviceName, LEFT(registerDate, 10) AS registerDate, deviceId, deviceType, deviceImgSrc
     FROM finedust.device_manage
     WHERE ${param.deviceId} = deviceId
     `;
 
     connection.query(getDeviceInfoQuery, function (err, rows) {
        deviceInfo = rows;
+       deviceImgSrc = rows[0].deviceImgSrc.substring(9, rows[0].deviceImgSrc.length);
     })
     connection.query(getDeviceTypeQuery, function (err, rows) {
         if(!err) {
             res.render('home/deviceUpdate', {
                 deviceData: rows,
-                deviceInfo: deviceInfo
+                deviceInfo: deviceInfo,
+                deviceImgSrc: deviceImgSrc
             })
         }
         else {
@@ -40,6 +43,7 @@ router.get('/', function(req, res) {
     })
 });
 
+// TODO: should make multer function
 router.get('/api/update', (req, res) => {
     const param = req.query;
     const registerQuery = `
