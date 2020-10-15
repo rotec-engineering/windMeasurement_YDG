@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const connection = require("../connection");
+const fs =require('fs');
 const multer = require('multer');
 const storage = multer.diskStorage({                                                // set storage of multer
     destination: (req, file, callback) => {                                             // file storage address
         callback(null, "public/images/deviceImg/");
     },
     filename: (req, file, callback) => {                                                // file rename to originalName
-        callback(null, file.originalname + Date.now());
+        callback(null, file.originalname);
     }
 });
 const uploader = multer({storage: storage});                                      // upload img file on server
@@ -69,23 +70,45 @@ router.post('/api/register', (req, res) => {
 });
 
 router.post('/api/imgUpload', uploader.single('deviceImg'), (req, res, next) => {
-    let fileSrc = 'public/images/deviceImg/';
-    console.log(fileSrc);
-    // kind of imgLoadStatus => 'uploading' & 'uploaded //
-    const deviceImgSrcInsertQuery = `
-    UPDATE finedust.device_manage
-    SET deviceImgSrc = CONCAT("${fileSrc}", deviceId), imgLoadStatus = 'uploaded'
+    // console.log(req.file.filename);
+    const deviceImgSrcChangeQuery = `
+    SELECT deviceId
+    FROM finedust.device_manage
     WHERE imgLoadStatus = 'uploading'
-    `;
+    `
 
-    connection.query(deviceImgSrcInsertQuery, function(err, rows) {
-        if (!err) {
-            const successMsg = 'imgFile upload Success';
-            res.send(successMsg);
+    connection.query(deviceImgSrcChangeQuery, function (err, rows) {
+        const fileSrc = './public/images/deviceImg/';
+        const fileName = req.file.filename;                                                                             // if user didnt choose Img, the err would be happen
+        let deviceImgSrc = fileSrc + rows[0].deviceId + '_' + fileName;
+
+        // kind of imgLoadStatus => 'uploading' & 'uploaded //
+        const deviceImgSrcInsertQuery = `
+        UPDATE finedust.device_manage
+        SET deviceImgSrc = '${deviceImgSrc}', imgLoadStatus = 'uploaded'
+        WHERE imgLoadStatus = 'uploading'
+        `;
+
+        console.log("test1" + deviceImgSrc);
+        if(!err) {
+            fs.rename(fileSrc + fileName, deviceImgSrc, function (err) {                 // file rename (if I need, I could divide ImgFolder follow with users)
+                if(err) throw err;
+            });
+
+            connection.query(deviceImgSrcInsertQuery, function(err, rows) {                                             // insert new imgSrc
+                if (!err) {
+                    const successMsg = 'imgFile upload Success';
+                    res.send(successMsg);
+                }
+                else {
+                    console.log(err);
+                    res.send(err);
+                }
+            })
         }
         else {
-            console.log(err);
-            res.send(err);
+            console.log("imageSrc Change Err");
+            return 0;
         }
     })
 });

@@ -3,25 +3,23 @@ extends layout
 block content
   link(rel='stylesheet', href='/css/info.css')
   include ./chartLayout.pug
-  //background color -> light gray(#E2E2E2)
-  body(style="background-color: #E2E2E2")
-    div
-      .left(style="width: 47%; height: 800px; float: left; box-sizing: border-box; background-color: #FFFFFF; margin-top: 3%; margin-left: 3%")
-        .row
-          .col
-            include ./home/realtimeWindData.pug
+  //background color -> white(#FFFFFF)
+  body(style="background-color: #FFFFFF")
+    div(style="width: 50%; margin-left: auto; margin-right: auto; margin-top: 3%")
+      //.left(style="width: 47%; height: 800px; float: left; box-sizing: border-box; background-color: #FFFFFF; margin-top: 3%; margin-left: 3%")
+      .row
+        .col
+          include ./home/realtimeWindData.pug
 
-          // -for(let i = 0; i < 7; i++)
-          //   input(id='dayExpress' + i, type = "hidden", value = `${dayWindData[i].rgst_dt}`)
-          -for(let i = 0; i < 12 * 6; i++)
-             input(id = 'windSpeedEachDay' + i, type = "hidden", value = `${timeWindDataFor6days[i].windSpeed}`)
-          -for(let i = 0; i < timeWindDataForLastDay.length; i++)
-            input(id='windSpeedLastDay' + i, type = 'hidden', value = `${timeWindDataForLastDay[i].windSpeed}`)
+        -for(let i = 0; i < 12 * 6; i++)
+           input(id = 'windSpeedEachDay' + i, type = "hidden", value = `${timeWindDataFor6days[i].windSpeed}`)
+        -for(let i = 0; i < timeWindDataForLastDay.length; i++)
+          input(id='windSpeedLastDay' + i, type = 'hidden', value = `${timeWindDataForLastDay[i].windSpeed}`)
 
-        .row
-          .col(style="width: 100%; float: right; box-sizing: border-box")
-            include ./home/windBarChart.pug
+      .row
+        .col(style="width: 100%; float: right; box-sizing: border-box")
+          include ./home/windBarChart.pug
 
 
-      .right(style="width: 45%; height: 800px; float: right; box-sizing: border-box; background-color: #FFFFFF; margin-top: 3%; margin-right: 3%; margin-bottom: 3%;")
+      //.right(style="width: 45%; height: 800px; float: right; box-sizing: border-box; background-color: #FFFFFF; margin-top: 3%; margin-right: 3%; margin-bottom: 3%;")
         include ./home/windDataTable.pug
