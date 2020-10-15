@@ -54,8 +54,6 @@ block content
                 contentType: 'application/json',
                 success: (result) => {
                     console.log(result)
-                    alert(result);
-                    location.href = "/deviceManage";
                 },
                 error: (err) => {
                     console.log(err)
@@ -73,6 +71,7 @@ block content
                 success: (result) => {
                     console.log(result)
                     alert(result);
+                    location.href = "/deviceManage";
                 },
                 error: (err) => {
                     console.log(err)

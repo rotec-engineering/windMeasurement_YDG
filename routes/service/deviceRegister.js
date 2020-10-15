@@ -59,7 +59,7 @@ router.post('/api/register', (req, res) => {
 
     connection.query(registerQuery, (err, rows) => {
         if (!err) {
-            const successMsg = "장치를 등록했습니다.";
+            const successMsg = "device insert success";
             res.send(successMsg);
         }
         else {
@@ -97,7 +97,7 @@ router.post('/api/imgUpload', uploader.single('deviceImg'), (req, res, next) => 
 
             connection.query(deviceImgSrcInsertQuery, function(err, rows) {                                             // insert new imgSrc
                 if (!err) {
-                    const successMsg = 'imgFile upload Success';
+                    const successMsg = "장치를 등록했습니다.";
                     res.send(successMsg);
                 }
                 else {
