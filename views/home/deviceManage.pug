@@ -5,6 +5,7 @@ block content
 
     script.
         const selectDevice = (e) => {
+            // document.getElementById("deviceImgView").src = 'images/deviceImg/36_A_device.jpg'
             showDeviceInfo(e.value);
         }
 
@@ -68,7 +69,8 @@ block content
                               option(value = `${dataOfTable[i].deviceId}`) #{dataOfTable[i].deviceName}
             tbody#deviceInfo(style="text-align: center; border: 1px solid")
                 tr
-                    td#deviceImg(colspan="2") 이미지
+                    td#deviceImg(colspan="2")
+                        img#deviceImgView(src=`${deviceImgSrc}`)
                 tr
                     th 장치 타입
                     td #{dataOfTable[0].deviceType}
