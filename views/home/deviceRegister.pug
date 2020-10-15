@@ -5,11 +5,24 @@ block content
 
     script.
         const selectDevice = (e) => {
-            if(e.value === 'customOption') {                                                // display the input function
+            if(e.value === 'customOption') {                                                // display the input function follow with selection
                 document.getElementsByName("customInput")[0].style.display = 'inline';
             }
             else {
                 document.getElementsByName("customInput")[0].style.display = 'none';
+            }
+        }
+
+        function uploadImgPreview() {                                                       // display picture that customer pic
+            let fileInfo = document.getElementById("deviceImgInput").files[0];
+            let reader = new FileReader();
+
+            reader.onload = function() {
+                document.getElementById("previewImg").src = reader.result;
+            };
+
+            if(fileInfo) {
+                reader.readAsDataURL(fileInfo);
             }
         }
 
@@ -19,27 +32,47 @@ block content
                 return 0;
 
             let deviceType;
-            if($("select[name= deviceOptions]").val() === "customOption") {
+            if($("select[name= deviceOptions]").val() === "customOption") {                 // deviceType that customer select (option or 'customInput')
                 deviceType = $("#customInput").val();
             }
             else {
                 deviceType =$("select[name= deviceOptions]").val();
             }
 
-            $.ajax({
-                data: {
+            let form = new FormData();                                                      // I used that when I control about ImgData
+            form.append("deviceImg", $("#deviceImgInput")[0].files[0]);
+
+            $.ajax({                                                                        // register data(name, type,
+                data: JSON.stringify({
                     'deviceName': $("input[name= deviceName]").val(),
-                    'deviceType': deviceType,
-                    // 'deviceImg':
-                },
-                type: 'get',
+                    'deviceType': deviceType
+                    // 'deviceImg': form
+                }),
+                type: 'post',
                 dataType: 'html',
                 url: "/deviceRegister/api/register",
                 contentType: 'application/json',
                 success: (result) => {
                     console.log(result)
-                    alert("장치를 등록했습니다.");
+                    alert(result);
                     location.href = "/deviceManage";
+                },
+                error: (err) => {
+                    console.log(err)
+                }
+            })
+
+            $.ajax({                                                                        // register img src follow with deviceId
+                data: form,
+                type: 'post',
+                processData: false,
+                // contentType : false,
+                dataType: 'html',                   //multipart/form-data
+                url: "/deviceRegister/api/imgUpload",
+                contentType: false,
+                success: (result) => {
+                    console.log(result)
+                    alert(result);
                 },
                 error: (err) => {
                     console.log(err)
@@ -59,7 +92,12 @@ block content
                         input(type="text" style="width: 100%" name="deviceName")
             tbody#deviceInfo
                 tr
-                    td#deviceImg(colspan="2") 이미지
+                    td#deviceImg(colspan="2")
+                        img#previewImg(src="")
+                tr
+                    td(colspan="2")
+                        input(type="file" id="deviceImgInput" name="deviceImgInput" style="width: 100%" accept="image/*" onchange="uploadImgPreview()")
+
                 tr
                     th 장치 타입
                     td
