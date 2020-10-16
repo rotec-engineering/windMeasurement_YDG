@@ -1,19 +1,27 @@
 extends ../layout
-
+// TODO: should be integrated (used jquery or used javascript) ex) document.getElementById('id').click() -> $('#id').click(function{})
 block content
     link(rel='stylesheet', href='/css/info.css')
 
     script.
+        let page = 0;
+
         $(function () {
-            $("#startDate").datepicker({defaultDate: new Date()}).val(moment().format('YYYY-MM-DD'));
-            $("#endDate").datepicker({defaultDate: new Date()}).val(moment().format('YYYY-MM-DD'));
+            $("#startDate").datepicker({defaultDate: new Date()}).val(moment().format('YYYY-MM-DD'));           // for calendar
+            $("#endDate").datepicker({defaultDate: new Date()}).val(moment().format('YYYY-MM-DD'));             // for calendar
+            $('#pageMore').click(function (e) {
+                page += 10;
+                readMore();
+            }).hide();
         });
 
-        const infoSearching = () => {
+        function infoSearching() {
+            page = 0;
+            $('#pageMore').show();
             search();
         }
 
-        const search = () => {
+        function search() {
             $.ajax({
                 data: {
                     'kind': $("select[name= selectSetting]").val(),
@@ -24,7 +32,8 @@ block content
                     'startDate': $("input[name= startDate]").val(),
                     'startTime': $("select[name= startTime]").val(),
                     'endDate': $("input[name= endDate]").val(),
-                    'endTime': $("select[name= endTime]").val()
+                    'endTime': $("select[name= endTime]").val(),
+                    'limits': page
                 },
                 type: 'get',
                 dataType: 'html',
@@ -32,6 +41,36 @@ block content
                 contentType: 'application/json',
                 success: (result) => {
                     $("#info-table > tbody").html(result);
+                },
+                error: (err) => {
+                    console.log(err)
+                }
+            })
+        }
+
+        function readMore() {
+            $.ajax({
+                data: {
+                    'kind': $("select[name= selectSetting]").val(),
+                    'year': $("select[name= selectYear]").val(),
+                    'quarter': $("select[name= selectQuarter]").val(),
+                    'month': $("select[name= selectMonth]").val(),
+                    'week': $("select[name= selectWeek]").val(),
+                    'startDate': $("input[name= startDate]").val(),
+                    'startTime': $("select[name= startTime]").val(),
+                    'endDate': $("input[name= endDate]").val(),
+                    'endTime': $("select[name= endTime]").val(),
+                    'limits': page
+                },
+                type: 'get',
+                dataType: 'html',
+                url: "/windDetail/api/search",
+                contentType: 'application/json',
+                success: (result) => {
+                    if(result ==='') {
+                        $('#pageMore').hide();
+                    }
+                    $("#info-table > tbody").append(result);
                 },
                 error: (err) => {
                     console.log(err)
@@ -121,11 +160,11 @@ block content
                         select#endTime(name="endTime" class='mr-2')
                             -for (let i = 1; i < 25; i++)       // 시간
                                 option(value = i < 10 ? '0' + (i - 1) : i - 1)= i < 10 ? '0' + i + '시' : i + '시'
-                        button(onClick='infoSearching()' class='btn btn-primary mr-2') 검색
+                        button(onClick='infoSearching()' class='btn btn-primary mr-2' style="border-radius: 10px") 검색
 
         .row.info-table
             .col-12
-                table#info-table(style="margin-left: auto; margin-right: auto; margin-top:1%; width: 50%;")
+                table#info-table(style="margin-left: auto; margin-right: auto; margin-top:1%; margin-bottom: 3%; width: 50%;")
                     thead
                         tr
                             th(rowspan="2") 날짜<br/>(년-월-일)
@@ -141,3 +180,5 @@ block content
                                         transform: `rotate(${map.windDirection}deg)`
                                     })
                                 td #{map.windSpeed} (m/s)
+
+            button#pageMore(class='btn btn-primary mr-2' style="margin-lft: auto; margin-right: auto; margin-bottom: 4%; border-radius: 10px") 더보기

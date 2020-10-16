@@ -33,7 +33,7 @@ const conditionQuery = (req_Obj) => {
             console.log("conditionQueryErr");
     }
 }
-const tableQuery = (req_Obj, data) => {
+const tableQuery = (req_Obj, data, limit) => {
     let query;
     if(data === 1) {
         query = ``;
@@ -52,12 +52,14 @@ const tableQuery = (req_Obj, data) => {
     FROM finedust_tb ${query}
     GROUP BY SUBSTR(rgst_dt, 1, 10)
     ORDER BY rgst_dt DESC
+    LIMIT ${limit}, 10
   `;
 }
 
 /* GET home page. */
 router.get('/', function(req, res) {
-    connection.query(tableQuery(req.query, 1), (err, rows) => {
+    const epxressLimit = 0;
+    connection.query(tableQuery(req.query, 1, epxressLimit), (err, rows) => {
         if (!err) {
             res.render('home/windDetail', {'datasOfTable': rows.map(data => {
                     return {
@@ -77,7 +79,9 @@ router.get('/', function(req, res) {
     })
 });
 router.get('/api/search', (req, res) => {
-    connection.query(tableQuery(req.query, 0), (err, rows) => {
+    const epxressLimit = req.query.limits;
+
+    connection.query(tableQuery(req.query, 0, epxressLimit), (err, rows) => {
         if (!err) {
             let result = null;
 
