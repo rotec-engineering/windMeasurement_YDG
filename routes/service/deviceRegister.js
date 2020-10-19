@@ -20,7 +20,6 @@ function currentTime() {
     return current;
 };
 
-
 /* GET home page. */
 router.get('/', function(req, res) {
     const getDeviceTypeQuery = `
@@ -46,12 +45,13 @@ router.post('/api/register', (req, res) => {
     const param = req.body;
     // kind of imgLoadStatus => 'uploading' & 'uploaded //
     const registerQuery = `
-    INSERT INTO finedust.device_manage (deviceName, deviceType, imgLoadStatus)
-    VALUES ("${param.deviceName}", "${param.deviceType}", "uploading")
+    INSERT INTO finedust.device_manage (deviceName, deviceType, imgLoadStatus, deviceLatitude, deviceLongitude)
+    VALUES ("${param.deviceName}", "${param.deviceType}", "uploading", "${param.latitude}", "${param.longitude}")
     `;
 
     if(param.deviceName === '' || param.deviceType === '') {                            // check the 'null' value from deviceName & deviceType
         const errMsg = "장치 명 또는 자치 타입 입력이 필요합니다.";
+        alert(errMsg);
         res.send(errMsg)
 
         return 0;
