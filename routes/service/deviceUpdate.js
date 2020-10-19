@@ -54,7 +54,7 @@ router.get('/', function(req, res) {
     })
 });
 
-// TODO: should make multer function
+// TODO: user's Img of before should be delete
 router.get('/api/update', (req, res) => {
     const param = req.query;
     const registerQuery = `
