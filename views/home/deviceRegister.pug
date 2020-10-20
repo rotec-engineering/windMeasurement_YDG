@@ -108,6 +108,7 @@ block content
                         '</div>'
                     ].join('\n'));
 
+                    marker.setPosition(point);
                     map.setCenter(point);
                     infoWindow.open(map, marker);
                 });
@@ -119,8 +120,6 @@ block content
                 }
 
                 map.addListener('click', function (e) {
-                    // console.log("e.coord => " + e.coord);
-                    // console.log("e.coord.x" + e.coord.x);
                     longitude = e.coord.x;                                      // set coordinate for DB
                     latitude = e.coord.y;                                       // set coordinate for DB
                     searchCoordinateToAddress(e.coord);
@@ -231,48 +230,45 @@ block content
     .row#deviceContatiner
         p#pageTitle 장치 등록
     .row#showTable
-        .col-5
-            table#showInfo
-                thead#deviceName
-                    tr
-                        th 장치 명
-                        td
-                            input(type="text" style="width: 100%" name="deviceName")
-                tbody#deviceInfo
-                    tr
-                        td#deviceImg(colspan="2")
-                            img#previewImg(src="")
-                    tr
-                        td(colspan="2")
-                            input(type="file" id="deviceImgInput" name="deviceImgInput" style="width: 100%" accept="image/*" onchange="uploadImgPreview()")
+        table#showInfo
+            thead#deviceName
+                tr
+                    th 장치 명
+                    td#deviceTitle
+                        input(type="text" name="deviceName")
+                    td#mapSearch
+                        input#address(type="text")
+                        button#submit() search
+            tbody#deviceInfo
+                tr
+                    td#deviceImg(colspan="2")
+                        img#previewImg(src="")
+                    td#map(rowspan="5" style="width: 600px")
+                tr
+                    td(colspan="2")
+                        input(type="file" id="deviceImgInput" name="deviceImgInput" style="width: 100%" accept="image/*" onchange="uploadImgPreview()")
 
-                    tr
-                        th 등록 장소
-                        td
-                            input#registerArea(type="text" disabled = true style="width: 100%")
-                    tr
-                        th 장치 타입
-                        td
-                            select#selectDevice(name="deviceOptions" style="width: 100%; text-align: center" onchange="selectDevice(this)")
-                                option(value = 'customOption') 사용자 입력
-                                -for (let i = 0; i < deviceData.length; i++)
-                                    option(value = `${deviceData[i].deviceType}`) #{deviceData[i].deviceType}
-                            input#customInput(type="text" name="customInput" style="width: 100%")
-                    tr
-                        th 등록 일
-                        td
-                            input(type="text" disabled = true style="width: 100%" value=`${currentTime}`)
-        .col
-            .row
-                input#address(type="text")
-                button#submit() search
-            .row#map
+                tr
+                    th 등록 장소
+                    td
+                        input#registerArea(type="text" disabled = true style="width: 100%")
+                tr
+                    th 장치 타입
+                    td
+                        select#selectDevice(name="deviceOptions" style="width: 100%; text-align: center" onchange="selectDevice(this)")
+                            option(value = 'customOption') 사용자 입력
+                            -for (let i = 0; i < deviceData.length; i++)
+                                option(value = `${deviceData[i].deviceType}`) #{deviceData[i].deviceType}
+                        input#customInput(type="text" name="customInput" style="width: 100%")
+                tr
+                    th 등록 일
+                    td
+                        input(type="text" disabled = true style="width: 100%" value=`${currentTime}`)
 
     .row
         table#buttonTable
             tr
-                td(colspan="2")
-                    button(onClick='registerDevice()' class='btn btn-dark mr-2' style="width: 90%") 장치 등록
-            tr
-                td(colspan="2")
-                    button(onClick='location.href = "/deviceManage"' class='btn btn-dark mr-2' style="width: 90%") 뒤로 가기
+                td
+                    button(onClick='registerDevice()' class='btn btn-dark mr-2') 장치 등록
+                td
+                    button(onClick='location.href = "/deviceManage"' class='btn btn-dark mr-2') 뒤로 가기
