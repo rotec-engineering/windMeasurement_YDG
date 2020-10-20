@@ -50,8 +50,7 @@ router.post('/api/register', (req, res) => {
     `;
 
     if(param.deviceName === '' || param.deviceType === '') {                            // check the 'null' value from deviceName & deviceType
-        const errMsg = "장치 명 또는 자치 타입 입력이 필요합니다.";
-        alert(errMsg);
+        const errMsg = 'register Err';
         res.send(errMsg)
 
         return 0;

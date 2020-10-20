@@ -198,24 +198,28 @@ block content
                 url: "/deviceRegister/api/register",
                 contentType: 'application/json',
                 success: (result) => {
-                    console.log(result)
-                },
-                error: (err) => {
-                    console.log(err)
-                }
-            })
-
-            $.ajax({                                                                        // register img src follow with deviceId
-                data: form,
-                type: 'post',
-                processData: false,
-                dataType: 'html',
-                url: "/deviceRegister/api/imgUpload",
-                contentType: false,
-                success: (result) => {
-                    console.log(result)
-                    alert(result);
-                    location.href = "/deviceManage";
+                    if(result === 'register Err') {
+                        alert("장치 명 또는 장치 타입 입력이 필요합니다.");
+                    }
+                    else {
+                        console.log(result);
+                        $.ajax({                                                                        // register img src follow with deviceId
+                            data: form,
+                            type: 'post',
+                            processData: false,
+                            dataType: 'html',
+                            url: "/deviceRegister/api/imgUpload",
+                            contentType: false,
+                            success: (result) => {
+                                console.log(result)
+                                alert(result);
+                                location.href = "/deviceManage";
+                            },
+                            error: (err) => {
+                                console.log(err)
+                            }
+                        })
+                    }
                 },
                 error: (err) => {
                     console.log(err)
