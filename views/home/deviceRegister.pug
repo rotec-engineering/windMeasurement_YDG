@@ -16,6 +16,11 @@ block content
                 mapTypeControl: true
             });
 
+            let marker = new naver.maps.Marker({
+                map: map,
+                position: position
+            });
+
             let infoWindow = new naver.maps.InfoWindow({
                 anchorSkew: true
             });
@@ -64,7 +69,7 @@ block content
                         '</div>'
                     ].join('\n'));
 
-                    infoWindow.open(map, latlng);
+                    infoWindow.open(map, marker);
                 });
             }
 
@@ -104,7 +109,7 @@ block content
                     ].join('\n'));
 
                     map.setCenter(point);
-                    infoWindow.open(map, point);
+                    infoWindow.open(map, marker);
                 });
             }
 
@@ -119,6 +124,7 @@ block content
                     longitude = e.coord.x;                                      // set coordinate for DB
                     latitude = e.coord.y;                                       // set coordinate for DB
                     searchCoordinateToAddress(e.coord);
+                    marker.setPosition(e.coord);
                 });
 
                 $('#address').on('keydown', function (e) {
@@ -257,7 +263,6 @@ block content
                 input#address(type="text")
                 button#submit() search
             .row#map
-                p w
 
     .row
         table#buttonTable
