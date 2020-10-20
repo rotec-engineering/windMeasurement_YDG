@@ -108,6 +108,8 @@ block content
                         '</div>'
                     ].join('\n'));
 
+                    longitude = point.x;                                      // set coordinate for DB
+                    latitude = point.y;                                       // set coordinate for DB
                     marker.setPosition(point);
                     map.setCenter(point);
                     infoWindow.open(map, marker);
@@ -202,6 +204,7 @@ block content
                     }
                     else {
                         console.log(result);
+                        // TODO: param -> id value
                         $.ajax({                                                                        // register img src follow with deviceId
                             data: form,
                             type: 'post',
