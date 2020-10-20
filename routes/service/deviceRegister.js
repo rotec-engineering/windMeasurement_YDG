@@ -70,7 +70,6 @@ router.post('/api/register', (req, res) => {
 });
 
 router.post('/api/imgUpload', uploader.single('deviceImg'), (req, res, next) => {
-    // console.log(req.file.filename);
     const deviceImgSrcChangeQuery = `
     SELECT deviceId
     FROM finedust.device_manage
@@ -80,7 +79,7 @@ router.post('/api/imgUpload', uploader.single('deviceImg'), (req, res, next) => 
     connection.query(deviceImgSrcChangeQuery, function (err, rows) {
         const fileSrc = './public/images/deviceImg/';
         const fileName = req.file === undefined ? '' : req.file.filename;                                               // if user didnt choose Img, the err would be happen
-        let deviceImgSrc = fileName === '' ? fileSrc + "notImg.jpg" : fileSrc + rows[0].deviceId + '_' + fileName;      // if user didnt choose Img
+        let deviceImgSrc = fileName === '' ? '' : fileSrc + rows[0].deviceId + '_' + fileName;                          // if user didnt choose Img
 
         // kind of imgLoadStatus => 'uploading' & 'uploaded //
         const deviceImgSrcInsertQuery = `
