@@ -2,43 +2,137 @@ extends ../layout
 
 block content
     link(rel='stylesheet', href='/stylesheets/deviceTable.css')
+    script(type='text/javascript' src='https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=tpkaldfehz')
 
     script.
-        const selectDevice = (e) => {
-            // document.getElementById("deviceImgView").src = 'images/deviceImg/36_A_device.jpg'
-            showDeviceInfo(e.value);
-        }
+        $(function () {                                                                             // naver map API setting
+            var HOME_PATH = window.HOME_PATH || '.';
 
-        function showDeviceInfo(deviceId) {
-            $.ajax({
-                data: {
-                    'deviceId': deviceId
-                },
+            var map = new naver.maps.Map('map', {
+                center: new naver.maps.LatLng(35.5039678, 129.3055745),
+                zoom: 13
+            });
+
+            var markers = [],
+                infoWindows = [];
+
+            $.ajax({                                                                                // get first data for showing the device location
+                data: {},
                 type: 'get',
-                dataType: 'html',
+                dataType: 'json',
                 url: "/deviceManage/api/search",
                 contentType: 'application/json',
                 success: (result) => {
-                    $("#deviceInfo").html(result);
+                    setMarkerNInfowindow(result);
                 },
                 error: (err) => {
                     console.log(err)
                 }
             })
+
+            function setMarkerNInfowindow (deviceInfo) {
+                for (var key in deviceInfo) {
+                    var position = new naver.maps.LatLng(deviceInfo[key].deviceLatitude, deviceInfo[key].deviceLongitude);
+                    var marker = new naver.maps.Marker({
+                        map: map,
+                        position: position,
+                    });
+
+                    let imgSrc = deviceInfo[key].deviceImgSrc === null ? '' : deviceInfo[key].deviceImgSrc.substring(9, deviceInfo[key].deviceImgSrc.length);;
+                    let deviceType = deviceInfo[key].deviceType;
+                    let registerDate = deviceInfo[key].registerDate;
+                    let modifyDate = deviceInfo[key].modifyDate === null ? '' : deviceInfo[key].modifyDate;
+                    let deviceId = deviceInfo[key].deviceId;
+                    let infoWindow = new naver.maps.InfoWindow({                                                                    // infoWindow context setter
+                        content: `
+                             <table>
+                               <tbody style="text-align: center">
+                                 <tr>
+                                   <td colspan="2"><img src="${imgSrc}"/></td>
+                                 </tr>
+                                 <tr>
+                                   <th>장치 타입</th>
+                                   <td> ${deviceType} </td>
+                                 </tr>
+                                 <tr>
+                                   <th>등록 일</th>
+                                   <td> ${registerDate} </td>
+                                 </tr>
+                                 <tr>
+                                   <th>수정 일</th>
+                                   <td> ${modifyDate} </td>
+                                 </tr>
+                                 <tr style="font-size: 12px">
+                                   <th><button type="button" onclick="goToDeviceUpdate(${deviceId})" style="width: 100%">수정</button></th>
+                                   <th><button type="button" onclick="deleteDevice(${deviceId})" style="width: 100%">삭제</button></th>
+                               </tbody>
+                             </table>
+                         `
+                    });
+
+                    markers.push(marker);
+                    infoWindows.push(infoWindow);
+                    naver.maps.Event.addListener(markers[key], 'click', getClickHandler(key));              // set eventListener
+                }
+            }
+
+            naver.maps.Event.addListener(map, 'idle', function () {
+                updateMarkers(map, markers);
+            });
+
+            function updateMarkers(map, markers) {                                                          // show marker & infoWindow following with map size
+                let mapBounds = map.getBounds();
+                let marker, position;
+
+                for (let i = 0; i < markers.length; i++) {
+                    marker = markers[i]
+                    position = marker.getPosition();
+
+                    if (mapBounds.hasLatLng(position)) {
+                        showMarker(map, marker);
+                    } else {
+                        hideMarker(map, marker);
+                    }
+                }
+            }
+
+            function showMarker(map, marker) {
+                if (marker.setMap()) return;
+                marker.setMap(map);
+            }
+
+            function hideMarker(map, marker) {
+                if (!marker.setMap()) return;
+                marker.setMap(null);
+            }
+
+            // 해당 마커의 인덱스를 seq라는 클로저 변수로 저장하는 이벤트 핸들러를 반환합니다.
+            function getClickHandler(seq) {                                                                 // envent handler about 'click'
+                return function (e) {
+                    var marker = markers[seq],
+                        infoWindow = infoWindows[seq];
+
+                    if (infoWindow.getMap()) {
+                        infoWindow.close();
+                    } else {
+                        infoWindow.open(map, marker);
+                    }
+                }
+            }
+        })
+
+        function goToDeviceUpdate(deviceId) {
+            location.href = '/deviceUpdate?deviceId=' + deviceId;
         }
 
-        function goToDeviceUpdate() {
-            location.href = '/deviceUpdate?deviceId=' + $("select[name=deviceName]").val();
-        }
-
-        function deleteDevice() {
+        function deleteDevice(deviceId) {
             let delConfirm = confirm("장치를 정말 삭제 하시겠습니까?");
             if (!delConfirm)
                 return 0;
-
+            console.log(deviceId);
             $.ajax({
                 data: {
-                    'deviceId': $("select[name=deviceName]").val()
+                    'deviceId': deviceId
                 },
                 type: 'get',
                 dataType: 'html',
@@ -59,36 +153,6 @@ block content
     .row#deviceContatiner
         p#pageTitle 장치 목록
 
-    .row#showTable
-        table#showInfo
-            thead#deviceName
-                tr
-                    th(colspan="2")
-                        select#selectDevice(name="deviceName" onchange="selectDevice(this)")
-                          -for(let i = 0; i < dataOfTable.length; i++)
-                              option(value = `${dataOfTable[i].deviceId}`) #{dataOfTable[i].deviceName}
-            tbody#deviceInfo(style="text-align: center; border: 1px solid")
-                tr
-                    td#deviceImg(colspan="2")
-                        img#deviceImgView(src=`${deviceImgSrc}`)
-                tr
-                    th 장치 타입
-                    td #{dataOfTable[0].deviceType}
-                tr
-                    th 등록 일
-                    td #{dataOfTable[0].registerDate}
-                tr
-                    th 수정 일
-                    td #{dataOfTable[0].modifyDate}
-
-    .row
-        table#buttonTable
-            tr
-                td
-                    button(onClick='location.href = "/deviceRegister"' class='btn btn-dark mr-2' style="width: 90%") 장치 등록
-            tr
-                td
-                    button(onClick='goToDeviceUpdate()' class='btn btn-dark mr-2' style="width: 90%") 장치 정보 수정
-            tr
-                td
-                    button(onClick='deleteDevice()' class='btn btn-dark mr-2' style="width: 90%") 현재 장치 삭제
+    #map(style="width: 50%; height: 600px; margin-left: auto; margin-right: auto; margin-bottom: 1%; border: 2px solid")
+    .row#registerRow(style="width: 50%; margin-left: auto; margin-right: auto; ")
+        button(onClick='location.href = "/deviceRegister"' class='btn btn-dark mr-2' style="text-align: right") 등록
