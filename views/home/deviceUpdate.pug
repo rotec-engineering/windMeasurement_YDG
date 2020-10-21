@@ -2,8 +2,180 @@ extends ../layout
 
 block content
     link(rel='stylesheet', href='/stylesheets/deviceTable.css')
+    script(type='text/javascript' src='https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=tpkaldfehz&submodules=geocoder')
 
     script.
+        let map,
+            marker,
+            infoWindow,
+            latitude,
+            longitude,
+            position;
+
+        $(function () {
+            map = new naver.maps.Map("map", {
+                center: position,
+                zoom: 15,
+                mapTypeControl: true
+            });
+
+            marker = new naver.maps.Marker({
+                map: map,
+                position: position
+            });
+
+            infoWindow = new naver.maps.InfoWindow({
+                anchorSkew: true
+            });
+
+            map.setCursor('pointer');
+
+            naver.maps.onJSContentLoaded = initGeocoder;
+            naver.maps.Event.once(map, 'init_stylemap', initGeocoder);
+        });
+
+        function searchCoordinateToAddress(latlng) {
+            infoWindow.close();
+
+            naver.maps.Service.reverseGeocode({
+                coords: latlng,
+                orders: [
+                    naver.maps.Service.OrderType.ADDR,
+                    naver.maps.Service.OrderType.ROAD_ADDR
+                ].join(',')
+            }, function (status, response) {
+                if (status === naver.maps.Service.Status.ERROR) {
+                    if (!latlng) {
+                        return alert('ReverseGeocode Error, Please check latlng');
+                    }
+                    if (latlng.toString) {
+                        return alert('ReverseGeocode Error, latlng:' + latlng.toString());
+                    }
+                    if (latlng.x && latlng.y) {
+                        return alert('ReverseGeocode Error, x:' + latlng.x + ', y:' + latlng.y);
+                    }
+                    return alert('ReverseGeocode Error, Please check latlng');
+                }
+
+                let htmlAddresses = [];
+                const address = response.v2.address;
+
+                if (address.jibunAddress !== '') {
+                    $("#registerArea").val(address.jibunAddress);
+                    htmlAddresses.push('[지번 주소] ' + address.jibunAddress);
+                }
+                if (address.roadAddress !== '') {
+                    htmlAddresses.push('[도로명 주소] ' + address.roadAddress);
+                }
+
+                infoWindow.setContent([
+                    '<div style="padding:10px; min-width:200px; line-height:150%; font-size: 12px">',
+                    // '<h5 style="margin-top:5px;">검색 좌표</h4><br />',
+                    htmlAddresses.join('<br />'),
+                    '</div>'
+                ].join('\n'));
+
+                infoWindow.open(map, marker);
+            });
+        }
+
+        function searchAddressToCoordinate(address) {
+            naver.maps.Service.geocode({
+                query: address
+            }, function (status, response) {
+                if (status === naver.maps.Service.Status.ERROR) {
+                    if (!address) {
+                        return alert('Geocode Error, Please check address');
+                    }
+                    return alert('Geocode Error, address:' + address);
+                }
+
+                if (response.v2.meta.totalCount === 0) {
+                    return alert('No result.');
+                }
+
+                let htmlAddresses = []
+                const item = response.v2.addresses[0]
+                const point = new naver.maps.Point(item.x, item.y);
+
+                if (item.roadAddress) {
+                    htmlAddresses.push('[도로명 주소] ' + item.roadAddress);
+                }
+                if (item.jibunAddress) {
+                    $("#registerArea").val(item.jibunAddress);
+                    htmlAddresses.push('[지번 주소] ' + item.jibunAddress);
+                }
+
+                infoWindow.setContent([
+                    '<div style="padding:10px;min-width:200px;line-height:150%; font-size: 12px">',
+                    '<h5 style="margin-top:5px;">검색 주소 : ' + address + '</h4><br />',
+                    htmlAddresses.join('<br />'),
+                    '</div>'
+                ].join('\n'));
+
+                marker.setPosition(point);
+                map.setCenter(point);
+                infoWindow.open(map, marker);
+            });
+        }
+
+        function initGeocoder() {
+            if (!map.isStyleMapReady) {
+                return;
+            }
+
+            map.addListener('click', function (e) {
+                longitude = e.coord.x;                                      // set coordinate for DB
+                latitude = e.coord.y;                                       // set coordinate for DB
+                searchCoordinateToAddress(e.coord);
+                marker.setPosition(e.coord);
+            });
+
+            $('#address').on('keydown', function (e) {
+                const keyCode = e.which;
+
+                if (keyCode === 13) {                                       // Enter Key
+                    longitude = e.coord.x;                                  // set coordinate for DB
+                    latitude = e.coord.y;                                   // set coordinate for DB
+                    searchAddressToCoordinate($('#address').val());
+                }
+            });
+
+            $('#submit').on('click', function (e) {
+                e.preventDefault();
+
+                longitude = e.coord.x;                                      // set coordinate for DB
+                latitude = e.coord.y;                                       // set coordinate for DB
+                searchAddressToCoordinate($('#address').val());
+            });
+
+            initLatLngBydeviceId();
+        }
+
+        function initLatLngBydeviceId() {
+            const deviceId = $('[name="deviceName"]').attr('id');
+            $.ajax({
+                data: {
+                    'deviceId': deviceId
+                },
+                type: 'get',
+                dataType: 'json',
+                url: "/deviceUpdate/api/search",
+                contentType: 'application/json',
+                success: (result) => {
+                    latitude = result.deviceLatitude;
+                    longitude = result.deviceLongitude;
+                    position = naver.maps.LatLng(latitude, longitude);
+                    searchCoordinateToAddress(position);
+                    marker.setPosition(position);
+                    map.setCenter(position);
+                },
+                error: (err) => {
+                    console.log(err)
+                }
+            })
+        }
+
         const selectDevice = (e) => {
             if (e.value === 'customOption') {                                                // display the input function
                 document.getElementsByName("customInput")[0].style.display = 'inline';
@@ -13,7 +185,7 @@ block content
         }
 
         function uploadImgPreview() {                                                       // display picture that customer pic
-            let fileInfo = document.getElementById("deviceImgInput").files[0];
+            const fileInfo = document.getElementById("deviceImgInput").files[0];
             let reader = new FileReader();
 
             reader.onload = function () {
@@ -26,7 +198,7 @@ block content
         }
 
         function updateDevice() {
-            let result = confirm("장치를 수정 하시겠습니까?");
+            const result = confirm("장치를 수정 하시겠습니까?");
             if (!result)
                 return 0;
 
@@ -39,36 +211,21 @@ block content
 
             let form = new FormData();                                                      // I used that when I control about ImgData
             form.append("deviceImg", $("#deviceImgInput")[0].files[0]);
-
+            form.append('deviceName', $("input[name= deviceName]").val());
+            form.append('deviceType', deviceType);
+            form.append('deviceLatitude', latitude);
+            form.append('deviceLongitude', longitude);
+            form.append('deviceId', $('[name="deviceName"]').attr('id'));
             $.ajax({
-                data: {
-                    'deviceName': $("input[name= deviceName]").val(),
-                    'deviceType': deviceType,
-                    'deviceId': $('[name="deviceName"]').attr('id')
-                    // 'deviceImg':
-                },
-                type: 'get',
-                dataType: 'html',
-                url: "/deviceUpdate/api/update",
-                contentType: 'application/json',
-                success: (result) => {
-                    console.log(result);
-                },
-                error: (err) => {
-                    console.log(err)
-                }
-            })
-
-            $.ajax({                                                                        // register img src follow with deviceId
                 data: form,
                 type: 'post',
                 processData: false,
-                // contentType : false,
-                dataType: 'html',                   //multipart/form-data
-                url: "/deviceUpdate/api/imgUpload",
-                contentType: false,
+                contentType : false,
+                dataType: 'html',
+                url: "/deviceUpdate/api/update",
                 success: (result) => {
-                    alert("장치를 수정했습니다.");
+                    console.log(result);
+                    alert(result);
                     location.href = "/deviceManage";
                 },
                 error: (err) => {
@@ -85,15 +242,23 @@ block content
             thead#deviceName
                 tr
                     th 장치 명
-                    td
-                        input(type="text" style="width: 100%" name="deviceName" value=`${deviceInfo[0].deviceName}` id=`${deviceInfo[0].deviceId}`)
+                    td#deviceTitle
+                        input(type="text" name="deviceName" value=`${deviceInfo[0].deviceName}` id=`${deviceInfo[0].deviceId}`)
+                        td#mapSearch
+                            input#address(type="text")
+                            button#submit() search
             tbody#deviceInfo
                 tr
                     td#deviceImg(colspan="2")
                         img#deviceImgView(src=`${deviceImgSrc}`)
+                    td#map(rowspan="5" style="width: 600px")
                 tr
                     td(colspan="2")
                         input(type="file" id="deviceImgInput" name="deviceImgInput" style="width: 100%" accept="image/*" onchange="uploadImgPreview()")
+                tr
+                    th 등록 장소
+                    td
+                        input#registerArea(type="text" disabled = true style="width: 100%")
                 tr
                     th 장치 타입
                     td
@@ -110,8 +275,8 @@ block content
     .row
         table#buttonTable
             tr
-                td(colspan="2")
-                    button(onClick='updateDevice()' class='btn btn-dark mr-2' style="width: 90%") 장치 수정
-            tr
-                td(colspan="2")
-                    button(onClick='location.href = "/deviceManage"' class='btn btn-dark mr-2' style="width: 90%") 뒤로 가기
+                td
+                    button(onClick='updateDevice()' class='btn btn-dark mr-2') 장치 수정
+                td
+                    button(onClick='location.href = "/deviceManage"' class='btn btn-dark mr-2') 뒤로 가기
+

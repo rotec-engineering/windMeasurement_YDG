@@ -26,16 +26,23 @@ router.get('/', function(req, res) {
     let deviceImgSrc
     const param = req.query;
     const getDeviceTypeQuery = `
-    SELECT distinct deviceType
-    FROM finedust.device_manage
-    GROUP BY deviceType
+        SELECT distinct deviceType
+        FROM finedust.device_manage
+        GROUP BY deviceType
     `;
     const getDeviceInfoQuery = `
-    SELECT deviceName, LEFT(registerDate, 10) AS registerDate, deviceId, deviceType, deviceImgSrc
-    FROM finedust.device_manage
-    WHERE ${param.deviceId} = deviceId
+        SELECT deviceName, 
+            LEFT(registerDate, 10) AS registerDate, 
+            deviceId, 
+            deviceType, 
+            deviceImgSrc, 
+            deviceLatitude, 
+            deviceLongitude
+        FROM finedust.device_manage
+        WHERE ${param.deviceId} = deviceId
     `;
 
+    console.log(param);
     connection.query(getDeviceInfoQuery, function (err, rows) {
        deviceInfo = rows;
        deviceImgSrc = rows[0].deviceImgSrc.substring(9, rows[0].deviceImgSrc.length);
@@ -54,18 +61,18 @@ router.get('/', function(req, res) {
     })
 });
 
-// TODO: user's Img of before should be delete
-router.get('/api/update', (req, res) => {
+router.get('/api/search', (req, res) => {
     const param = req.query;
-    const registerQuery = `
-    UPDATE finedust.device_manage 
-    SET deviceName = '${param.deviceName}', deviceType = '${param.deviceType}', modifyDate = '${currentTime()}', imgLoadStatus = 'uploading'
-    WHERE deviceId = ${param.deviceId}
+    const getLatLng = `
+        SELECT deviceLatitude, 
+            deviceLongitude
+        FROM finedust.device_manage 
+        WHERE deviceId = ${param.deviceId}
     `;
 
-    connection.query(registerQuery, (err, rows) => {
+    connection.query(getLatLng, (err, rows) => {
         if (!err) {
-            res.send("data update success");
+            res.send(rows[0]);
         }
         else {
             console.log(err);
@@ -74,49 +81,47 @@ router.get('/api/update', (req, res) => {
     })
 })
 
-router.post('/api/imgUpload', uploader.single('deviceImg'), (req, res, next) => {
-    // console.log(req.file.filename);
-    const deviceImgSrcChangeQuery = `
-    SELECT deviceId
-    FROM finedust.device_manage
-    WHERE imgLoadStatus = 'uploading'
-    `
+// TODO: user's Img of before should be delete
+router.post('/api/update', uploader.single('deviceImg'), (req, res) => {
+    console.log('here');
+    const param = req.body;
+    const fileSrc = './public/images/deviceImg/';
+    const fileName = req.file === undefined ? '' : req.file.filename;                                                   // if user didnt choose Img, the err would be happen
+    const deviceImgSrc = fileName === '' ? '' : fileSrc + param.deviceId + '_' + fileName;                              // if user didnt choose Img
+    const registerQuery = `
+        UPDATE finedust.device_manage 
+        SET deviceName = '${param.deviceName}', 
+            deviceType = '${param.deviceType}', 
+            modifyDate = '${currentTime()}', 
+            deviceImgSrc = '${deviceImgSrc}', 
+            imgLoadStatus = 'uploaded',
+            deviceLatitude = '${param.deviceLatitude}', 
+            deviceLongitude = '${param.deviceLongitude}'
+        WHERE deviceId = ${param.deviceId}
+    `;
 
-    connection.query(deviceImgSrcChangeQuery, function (err, rows) {
-        const fileSrc = './public/images/deviceImg/';
-        const fileName = req.file === undefined ? '' : req.file.filename;                                               // if user didnt choose Img, the err would be happen
-        let deviceImgSrc = fileName === '' ? fileSrc + "notImg.jpg" : fileSrc + rows[0].deviceId + '_' + fileName;      // if user didnt choose Img
+    if(param.deviceName === '' || param.deviceType === '') {                                                            // check the 'null' value from deviceName & deviceType
+        const errMsg = 'register Err';
+        res.send(errMsg)
 
-        // kind of imgLoadStatus => 'uploading' & 'uploaded //
-        const deviceImgSrcInsertQuery = `
-        UPDATE finedust.device_manage
-        SET deviceImgSrc = '${deviceImgSrc}', imgLoadStatus = 'uploaded'
-        WHERE imgLoadStatus = 'uploading'
-        `;
+        return 0;
+    }
 
-        if(!err) {
+    connection.query(registerQuery, (err, rows) => {
+        if (!err) {
             if(fileName !== '') {                                                                                       // not registered deviceImg
                 fs.rename(fileSrc + fileName, deviceImgSrc, function (err) {             // file rename (if I need, I could divide ImgFolder follow with users)
                     if (err) throw err;
                 });
             }
-
-            connection.query(deviceImgSrcInsertQuery, function(err, rows) {                                             // insert new imgSrc
-                if (!err) {
-                    const successMsg = "장치를 등록했습니다.";
-                    res.send(successMsg);
-                }
-                else {
-                    console.log(err);
-                    res.send(err);
-                }
-            })
+            const successMsg = "수정을 완료했습니다.";
+            res.send(successMsg);
         }
         else {
-            console.log("imageSrc Change Err");
-            return 0;
+            console.log(err);
+            res.send(err);
         }
     })
-});
+})
 
 module.exports = router;
