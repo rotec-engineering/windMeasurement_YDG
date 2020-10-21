@@ -16,19 +16,22 @@ block content
             var markers = [],
                 infoWindows = [];
 
-            $.ajax({                                                                                // get first data for showing the device location
-                data: {},
-                type: 'get',
-                dataType: 'json',
-                url: "/deviceManage/api/search",
-                contentType: 'application/json',
-                success: (result) => {
-                    setMarkerNInfowindow(result);
-                },
-                error: (err) => {
-                    console.log(err)
-                }
-            })
+            initAjax();
+            function initAjax() {
+                $.ajax({                                                                                // get first data for showing the device location
+                    data: {},
+                    type: 'get',
+                    dataType: 'json',
+                    url: "/deviceManage/api/search",
+                    contentType: 'application/json',
+                    success: (result) => {
+                        setMarkerNInfowindow(result);
+                    },
+                    error: (err) => {
+                        console.log(err)
+                    }
+                })
+            }
 
             function setMarkerNInfowindow (deviceInfo) {
                 for (var key in deviceInfo) {
