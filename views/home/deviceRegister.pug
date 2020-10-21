@@ -173,8 +173,9 @@ block content
 
         function registerDevice() {
             let result = confirm("장치를 등록 하시겠습니까?")
-            if(!result)
+            if(!result) {
                 return 0;
+            }
 
             let deviceType;
             if($("select[name= deviceOptions]").val() === "customOption") {                 // deviceType that customer select (option or 'customInput')
@@ -186,41 +187,25 @@ block content
 
             let form = new FormData();                                                      // I used that when I control about ImgData
             form.append("deviceImg", $("#deviceImgInput")[0].files[0]);
-
+            form.append('deviceName', $("input[name= deviceName]").val());
+            form.append('deviceType', deviceType);
+            form.append('latitude', latitude);
+            form.append('longitude', longitude);
             $.ajax({                                                                        // register data(name, type,
-                data: JSON.stringify({
-                    'deviceName': $("input[name= deviceName]").val(),
-                    'deviceType': deviceType,
-                    'latitude': latitude,
-                    'longitude': longitude
-                }),
+                data: form,
                 type: 'post',
+                processData: false,
+                contentType: false,
                 dataType: 'html',
                 url: "/deviceRegister/api/register",
-                contentType: 'application/json',
                 success: (result) => {
                     if(result === 'register Err') {
                         alert("장치 명 또는 장치 타입 입력이 필요합니다.");
                     }
                     else {
                         console.log(result);
-                        // TODO: param -> id value
-                        $.ajax({                                                                        // register img src follow with deviceId
-                            data: form,
-                            type: 'post',
-                            processData: false,
-                            dataType: 'html',
-                            url: "/deviceRegister/api/imgUpload",
-                            contentType: false,
-                            success: (result) => {
-                                console.log(result)
-                                alert(result);
-                                location.href = "/deviceManage";
-                            },
-                            error: (err) => {
-                                console.log(err)
-                            }
-                        })
+                        alert(result);
+                        location.href = "/deviceManage";
                     }
                 },
                 error: (err) => {

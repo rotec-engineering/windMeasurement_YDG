@@ -41,15 +41,19 @@ router.get('/', function(req, res) {
     });
 });
 
-router.post('/api/register', (req, res) => {
+router.post('/api/register', uploader.single('deviceImg'), (req, res) => {
     const param = req.body;
-    // kind of imgLoadStatus => 'uploading' & 'uploaded //
+    //-- kind of imgLoadStatus => 'uploading' & 'uploaded --//
     const registerQuery = `
-    INSERT INTO finedust.device_manage (deviceName, deviceType, imgLoadStatus, deviceLatitude, deviceLongitude)
-    VALUES ("${param.deviceName}", "${param.deviceType}", "uploading", "${param.latitude}", "${param.longitude}")
+        INSERT INTO finedust.device_manage (deviceName, deviceType, imgLoadStatus, deviceLatitude, deviceLongitude)
+        VALUES ("${param.deviceName}", "${param.deviceType}", "uploading", "${param.latitude}", "${param.longitude}")
+    `;
+    //-- get the latest deviceId in same trigger (@@IDENTITY)--//
+    const currentDeviceIdSelectQuery = `
+        SELECT @@IDENTITY AS deviceId                                                    
     `;
 
-    if(param.deviceName === '' || param.deviceType === '') {                            // check the 'null' value from deviceName & deviceType
+    if(param.deviceName === '' || param.deviceType === '') {                                                            // check the 'null' value from deviceName & deviceType
         const errMsg = 'register Err';
         res.send(errMsg)
 
@@ -59,38 +63,33 @@ router.post('/api/register', (req, res) => {
     connection.query(registerQuery, (err, rows) => {
         if (!err) {
             const successMsg = "device insert success";
-            res.send(successMsg);
+            console.log(successMsg);
         }
         else {
             console.log(err);
             res.send(err);
         }
     });
-});
-
-router.post('/api/imgUpload', uploader.single('deviceImg'), (req, res, next) => {
-    const deviceImgSrcChangeQuery = `
-    SELECT deviceId
-    FROM finedust.device_manage
-    WHERE imgLoadStatus = 'uploading'
-    `
-
-    connection.query(deviceImgSrcChangeQuery, function (err, rows) {
+    // TODO: should improve the performance by change the query statements [2020-10-21]
+    connection.query(currentDeviceIdSelectQuery, function (err, rows) {
         const fileSrc = './public/images/deviceImg/';
         const fileName = req.file === undefined ? '' : req.file.filename;                                               // if user didnt choose Img, the err would be happen
-        let deviceImgSrc = fileName === '' ? '' : fileSrc + rows[0].deviceId + '_' + fileName;                          // if user didnt choose Img
+        const deviceId = rows[0].deviceId;
+        const deviceImgSrc = fileName === '' ? '' : fileSrc + deviceId + '_' + fileName;                                // if user didnt choose Img
 
         // kind of imgLoadStatus => 'uploading' & 'uploaded //
         const deviceImgSrcInsertQuery = `
-        UPDATE finedust.device_manage
-        SET deviceImgSrc = '${deviceImgSrc}', imgLoadStatus = 'uploaded'
-        WHERE imgLoadStatus = 'uploading'
+            UPDATE finedust.device_manage
+                SET deviceImgSrc = '${deviceImgSrc}', imgLoadStatus = 'uploaded'
+                WHERE deviceId = '${deviceId}'
         `;
 
         if(!err) {
-            if(fileName !== '') {                                                                                       // not registered deviceImg
+            if(fileName !== '') {                                                                                       // registered deviceImg
                 fs.rename(fileSrc + fileName, deviceImgSrc, function (err) {             // file rename (if I need, I could divide ImgFolder follow with users)
-                    if (err) throw err;
+                    if (err) {
+                        throw err;
+                    }
                 });
             }
 
