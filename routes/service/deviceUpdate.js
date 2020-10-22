@@ -81,7 +81,7 @@ router.get('/api/init', (req, res) => {
     });
 });
 
-// TODO: user's Img of before should be delete
+// TODO: user's Img of before should be delete / if user didnt choose Img how to do that?
 router.post('/api/update', uploader.single('deviceImg'), (req, res) => {
     const param = req.body;
     const fileSrc = './public/images/deviceImg/';
@@ -108,7 +108,7 @@ router.post('/api/update', uploader.single('deviceImg'), (req, res) => {
 
     connection.query(registerQuery, (err, rows) => {
         if (!err) {
-            if(fileName !== '') {                                                                                       // not registered deviceImg
+            if(fileName !== '' || undefined) {                                                                          // not registered deviceImg
                 fs.rename(fileSrc + fileName, deviceImgSrc, function (err) {             // file rename (if I need, I could divide ImgFolder follow with users)
                     if (err) {
                         throw err;
