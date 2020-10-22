@@ -7,6 +7,7 @@ block content
     script.
         let latitude = 35.5039678;
         let longitude = 129.3055745;
+        let deviceImg;
         const position = new naver.maps.LatLng(latitude, longitude);
 
         $(function () {
@@ -158,21 +159,41 @@ block content
             }
         }
 
-        function uploadImgPreview() {                                                       // display picture that customer pic
-            let fileInfo = document.getElementById("deviceImgInput").files[0];
-            let reader = new FileReader();
+        function uploadImgPreview(fileInput) {                                              // display picture that customer pic
+            if (fileInput.files && fileInput.files[0]) {
+                if (fileInput.files[0].type.substring(0, 5) !== 'image') {                  // if user choose the none Img File, it should be not operated
+                    alert("이미지 파일이 아닙니다.\n이미지 파일을 선택해주세요.");
 
-            reader.onload = function() {
-                document.getElementById("previewImg").src = reader.result;
-            };
+                    deviceImg = undefined;
+                    document.getElementById("deviceImgInput").value = '';                   // must be used on over IE11
+                    document.getElementById("previewImg").src = '';
 
-            if(fileInfo) {
-                reader.readAsDataURL(fileInfo);
+                    return 0;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function () {
+                    document.getElementById("previewImg").src = reader.result;
+                };
+
+                deviceImg = fileInput.files[0];
+                reader.readAsDataURL(deviceImg);
             }
         }
 
+        function deleteExistingImg() {                                                      // remove preView Img
+            let result = confirm("이미지를 삭제 하시겠습니까?");
+            if (!result) {
+                return 0;
+            }
+
+            deviceImg = undefined;
+            document.getElementById("deviceImgInput").value = '';                           // must be used on over IE11
+            document.getElementById("previewImg").src = '';
+        }
+
         function registerDevice() {
-            let result = confirm("장치를 등록 하시겠습니까?")
+            let result = confirm("장치를 등록 하시겠습니까?");
             if(!result) {
                 return 0;
             }
@@ -186,7 +207,7 @@ block content
             }
 
             let form = new FormData();                                                      // I used that when I control about ImgData
-            form.append("deviceImg", $("#deviceImgInput")[0].files[0]);
+            form.append("deviceImg", deviceImg);
             form.append('deviceName', $("input[name= deviceName]").val());
             form.append('deviceType', deviceType);
             form.append('latitude', latitude);
@@ -234,7 +255,8 @@ block content
                     td#map(rowspan="5" style="width: 600px")
                 tr
                     td(colspan="2")
-                        input(type="file" id="deviceImgInput" name="deviceImgInput" style="width: 100%" accept="image/*" onchange="uploadImgPreview()")
+                        input(type="file" id="deviceImgInput" name="deviceImgInput" style="width: 75%; float: left" accept="image/*" onchange="uploadImgPreview(this)")
+                        button#cancelPicture(onClick='deleteExistingImg()' style="width: 20%; float: right; font-size: 11px" class='btn btn-dark mr-2') X
 
                 tr
                     th 등록 장소
