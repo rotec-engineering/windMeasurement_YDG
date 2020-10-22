@@ -5,12 +5,13 @@ block content
     script(type='text/javascript' src='https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=tpkaldfehz&submodules=geocoder')
 
     script.
-        let map,
-            marker,
-            infoWindow,
-            latitude,
-            longitude,
-            position;
+        let map
+        let marker
+        let infoWindow
+        let deviceImgSrc;
+        let latitude
+        let longitude
+        let position;
 
         $(function () {
             map = new naver.maps.Map("map", {
@@ -31,10 +32,10 @@ block content
             map.setCursor('pointer');
 
             naver.maps.onJSContentLoaded = initGeocoder;
-            naver.maps.Event.once(map, 'init_stylemap', initGeocoder);
+            // naver.maps.Event.once(map, 'init_stylemap', initGeocoder);
         });
 
-        function searchCoordinateToAddress(latlng) {
+        function searchCoordinateToAddress(latlng) {                                                            // coordinate to address
             infoWindow.close();
 
             naver.maps.Service.reverseGeocode({
@@ -79,7 +80,7 @@ block content
             });
         }
 
-        function searchAddressToCoordinate(address) {
+        function searchAddressToCoordinate(address) {                                                           // address to coordinate
             naver.maps.Service.geocode({
                 query: address
             }, function (status, response) {
@@ -89,7 +90,6 @@ block content
                     }
                     return alert('Geocode Error, address:' + address);
                 }
-
                 if (response.v2.meta.totalCount === 0) {
                     return alert('No result.');
                 }
@@ -113,6 +113,8 @@ block content
                     '</div>'
                 ].join('\n'));
 
+                longitude = point.x;                                        // set coordinate for DB
+                latitude = point.y;                                         // set coordinate for DB
                 marker.setPosition(point);
                 map.setCenter(point);
                 infoWindow.open(map, marker);
@@ -135,8 +137,6 @@ block content
                 const keyCode = e.which;
 
                 if (keyCode === 13) {                                       // Enter Key
-                    longitude = e.coord.x;                                  // set coordinate for DB
-                    latitude = e.coord.y;                                   // set coordinate for DB
                     searchAddressToCoordinate($('#address').val());
                 }
             });
@@ -144,15 +144,13 @@ block content
             $('#submit').on('click', function (e) {
                 e.preventDefault();
 
-                longitude = e.coord.x;                                      // set coordinate for DB
-                latitude = e.coord.y;                                       // set coordinate for DB
                 searchAddressToCoordinate($('#address').val());
             });
 
             initLatLngBydeviceId();
         }
 
-        function initLatLngBydeviceId() {
+        function initLatLngBydeviceId() {                                   // set location based on selected device
             const deviceId = $('[name="deviceName"]').attr('id');
             $.ajax({
                 data: {
@@ -160,12 +158,14 @@ block content
                 },
                 type: 'get',
                 dataType: 'json',
-                url: "/deviceUpdate/api/search",
+                url: "/deviceUpdate/api/init",
                 contentType: 'application/json',
                 success: (result) => {
                     latitude = result.deviceLatitude;
                     longitude = result.deviceLongitude;
                     position = naver.maps.LatLng(latitude, longitude);
+                    deviceImgSrc = result.deviceImgSrc;
+
                     searchCoordinateToAddress(position);
                     marker.setPosition(position);
                     map.setCenter(position);
@@ -176,18 +176,19 @@ block content
             })
         }
 
-        const selectDevice = (e) => {
+        function selectDevice (e) {
             if (e.value === 'customOption') {                                                // display the input function
                 document.getElementsByName("customInput")[0].style.display = 'inline';
-            } else {
+            }
+            else {
                 document.getElementsByName("customInput")[0].style.display = 'none';
             }
         }
 
+        // TODO: if user canceled the picture, preview part also should be disappeared
         function uploadImgPreview() {                                                       // display picture that customer pic
-            const fileInfo = document.getElementById("deviceImgInput").files[0];
             let reader = new FileReader();
-
+            const fileInfo = document.getElementById("deviceImgInput").files[0];
             reader.onload = function () {
                 document.getElementById("deviceImgView").src = reader.result;
             };
@@ -199,15 +200,14 @@ block content
 
         function updateDevice() {
             const result = confirm("장치를 수정 하시겠습니까?");
-            if (!result)
+            if (!result){
                 return 0;
-
-            let deviceType;
-            if ($("select[name= deviceOptions]").val() === "customOption") {
-                deviceType = $("#customInput").val();
-            } else {
-                deviceType = $("select[name= deviceOptions]").val();
             }
+
+            const deviceType =
+                $("select[name= deviceOptions]").val() === "customOption" ?
+                $("#customInput").val() :
+                $("select[name= deviceOptions]").val();
 
             let form = new FormData();                                                      // I used that when I control about ImgData
             form.append("deviceImg", $("#deviceImgInput")[0].files[0]);
@@ -216,6 +216,7 @@ block content
             form.append('deviceLatitude', latitude);
             form.append('deviceLongitude', longitude);
             form.append('deviceId', $('[name="deviceName"]').attr('id'));
+            form.append('deviceImgSrc', deviceImgSrc);
             $.ajax({
                 data: form,
                 type: 'post',

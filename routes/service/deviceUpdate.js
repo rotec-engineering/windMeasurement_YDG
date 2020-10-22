@@ -42,11 +42,10 @@ router.get('/', function(req, res) {
         WHERE ${param.deviceId} = deviceId
     `;
 
-    console.log(param);
     connection.query(getDeviceInfoQuery, function (err, rows) {
        deviceInfo = rows;
        deviceImgSrc = rows[0].deviceImgSrc.substring(9, rows[0].deviceImgSrc.length);
-    })
+    });
     connection.query(getDeviceTypeQuery, function (err, rows) {
         if(!err) {
             res.render('home/deviceUpdate', {
@@ -58,14 +57,15 @@ router.get('/', function(req, res) {
         else {
             res.render('home/deviceUpdate', err);
         }
-    })
+    });
 });
 
-router.get('/api/search', (req, res) => {
+router.get('/api/init', (req, res) => {
     const param = req.query;
     const getLatLng = `
         SELECT deviceLatitude, 
-            deviceLongitude
+            deviceLongitude,
+            deviceImgSrc
         FROM finedust.device_manage 
         WHERE deviceId = ${param.deviceId}
     `;
@@ -78,16 +78,15 @@ router.get('/api/search', (req, res) => {
             console.log(err);
             res.send(err);
         }
-    })
-})
+    });
+});
 
 // TODO: user's Img of before should be delete
 router.post('/api/update', uploader.single('deviceImg'), (req, res) => {
-    console.log('here');
     const param = req.body;
     const fileSrc = './public/images/deviceImg/';
     const fileName = req.file === undefined ? '' : req.file.filename;                                                   // if user didnt choose Img, the err would be happen
-    const deviceImgSrc = fileName === '' ? '' : fileSrc + param.deviceId + '_' + fileName;                              // if user didnt choose Img
+    const deviceImgSrc = fileName === '' ? param.deviceImgSrc : fileSrc + param.deviceId + '_' + fileName;              // if user didnt choose Img
     const registerQuery = `
         UPDATE finedust.device_manage 
         SET deviceName = '${param.deviceName}', 
@@ -111,7 +110,9 @@ router.post('/api/update', uploader.single('deviceImg'), (req, res) => {
         if (!err) {
             if(fileName !== '') {                                                                                       // not registered deviceImg
                 fs.rename(fileSrc + fileName, deviceImgSrc, function (err) {             // file rename (if I need, I could divide ImgFolder follow with users)
-                    if (err) throw err;
+                    if (err) {
+                        throw err;
+                    }
                 });
             }
             const successMsg = "수정을 완료했습니다.";
@@ -121,7 +122,16 @@ router.post('/api/update', uploader.single('deviceImg'), (req, res) => {
             console.log(err);
             res.send(err);
         }
-    })
-})
+    });
+
+    if(fileName !== '') {                                                                                               // if Img was changed, existing Img would be deleted
+        fs.unlink(param.deviceImgSrc, function (err) {
+            if (err) {
+                throw err;
+            }
+        });
+        console.log("ImgFile del");
+    }
+});
 
 module.exports = router;
