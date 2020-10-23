@@ -55,7 +55,7 @@ router.get('/api/init', (req, res) => {
 });
 
 router.get('/api/delete', (req, res) => {
-    let deleteDeviceId;
+    let deviceImgSrc;
     const param = req.query;
     const deviceDeleteQuery = `
         DELETE 
@@ -70,7 +70,7 @@ router.get('/api/delete', (req, res) => {
 
     connection.query(existingImgSrc, function (err, rows) {                                                 // get existing ImgSrc
         if(!err) {
-            deleteDeviceId = rows[0].deviceImgSrc;
+            deviceImgSrc = rows[0].deviceImgSrc;
         }
         else {
             res.send("loadExistingImgSrc Err");
@@ -79,8 +79,8 @@ router.get('/api/delete', (req, res) => {
 
     connection.query(deviceDeleteQuery, function (err) {
         if (!err) {
-            if(deleteDeviceId !== '' || undefined){                                                         // if Img wasnt exist, not delete Img
-                fs.unlink(deleteDeviceId, function (err) {
+            if(deviceImgSrc !== '' && deviceImgSrc !== undefined){                                                         // if Img wasnt exist, not delete Img
+                fs.unlink(deviceImgSrc, function (err) {
                     if (err) {
                         throw err;
                     }
