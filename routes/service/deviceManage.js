@@ -10,18 +10,28 @@ router.get('/', function(req, res) {
             LEFT(registerDate, 10) AS registerDate, 
             LEFT(modifyDate, 10) AS modifyDate, 
             deviceId, 
-            deviceType, 
-            deviceImgSrc
+            deviceType,
+            deviceLatitude,
+            deviceLongitude        
+--             deviceImgSrc
         FROM finedust.device_manage
         ORDER BY deviceName
     `;
 
     connection.query(deviceSearchQuery, (err, rows) => {
         if(!err) {
-            res.render('home/deviceManage', {
-                dataOfTable: rows,                                                                          // [registerDate, modifyDate, deviceId, deviceType, deviceImgSrc]
-                deviceImgSrc: rows[0].deviceImgSrc.substring(9, rows[0].deviceImgSrc.length)                // default path is 'public' So cut the front part
-            })
+            res.render('home/deviceManage', {'dataOfTable': rows.map(data => {
+                    return {
+                        deviceId: data.deviceId,
+                        deviceName: data.deviceName,
+                        deviceType: data.deviceType,
+                        deviceLatitude: data.deviceLatitude,
+                        deviceLongitude: data.deviceLongitude,
+                        registerDate: data.registerDate,
+                        modifyDate: data.modifyDate
+                    }
+                })
+            });
         }
         else {
             console.log(err);

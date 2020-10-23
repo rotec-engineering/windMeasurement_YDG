@@ -69,11 +69,64 @@
     border: 1px solid;
 }
 
+#map {
+    width: 50%;
+    height: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1%;
+    border: 2px solid;
+}
+#registerRow {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #buttonTable {
     text-align: right;
     margin-top: 1%;
     margin-left: auto;
     margin-right: auto;
     width: 10%;
+}
+
+#toggleOperation {
+    width: 100%;
+    display: none;
+}
+#toggleOperation #deviceManageTable {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 1%;
+    width: 45%;
+    text-align: center;
+    border: 2px solid;
+}
+#toggleOperation #deviceManageTableHead {
+    background-color: #adb5bd;
+    border: 2px solid;
+}
+#toggleOperation #deviceManageTableHead tr th {
+    border: 2px solid;
+}
+#toggleOperation #deviceManageTableTbody {
+    border: 2px solid;
+}
+#toggleOperation #deviceManageTableTbody tr td {
+    border: 2px solid;
+}
+
+#tableShowToggle {
+    height: 100%;
+    line-height: 40px;
+    display: block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    color: #2962ff;
+}
+#tableShowToggle:hover {
+    text-decoration: underline;
 }
 
