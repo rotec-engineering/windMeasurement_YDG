@@ -2,7 +2,7 @@ extends ../layout
 
 block content
     link(rel='stylesheet', href='/stylesheets/deviceTable.css')
-    script(type='text/javascript' src='https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=tpkaldfehz')
+    script(type='text/javascript' src='https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=tpkaldfehz&submodules=geocoder')
 
     script.
         let map
@@ -111,6 +111,44 @@ block content
         //     marker.setMap(null);
         // }
 
+        function searchCoordinateToAddress(Lat, Lng, textId) {
+            const latlng = naver.maps.LatLng(Lat, Lng);
+            let htmlAddresses = [];
+
+            naver.maps.Service.reverseGeocode({
+                coords: latlng,
+                orders: [
+                    naver.maps.Service.OrderType.ADDR,
+                    naver.maps.Service.OrderType.ROAD_ADDR
+                ].join(',')
+            }, function (status, response) {
+                if (status === naver.maps.Service.Status.ERROR) {
+                    if (!latlng) {
+                        return alert('ReverseGeocode Error, Please check latlng');
+                    }
+                    if (latlng.toString) {
+                        return alert('ReverseGeocode Error, latlng:' + latlng.toString());
+                    }
+                    if (latlng.x && latlng.y) {
+                        return alert('ReverseGeocode Error, x:' + latlng.x + ', y:' + latlng.y);
+                    }
+                    return alert('ReverseGeocode Error, Please check latlng');
+                }
+
+                let address = response.v2.address;
+
+                if (address.jibunAddress !== '') {
+                    htmlAddresses.push('[지번 주소] ' + address.jibunAddress + '\n');
+                }
+
+                if (address.roadAddress !== '') {
+                    htmlAddresses.push('[도로명 주소] ' + address.roadAddress);
+                }
+
+                document.getElementById(textId).innerText = htmlAddresses;
+            });
+        }
+
         function getClickHandler(seq) {                                                                 // event handler about 'click'
             return function () {
                 const marker = markers[seq]
@@ -153,13 +191,47 @@ block content
             })
         }
 
+        function openCloseTable() {
+            if (document.getElementById('toggleOperation').style.display === 'block') {
+                document.getElementById('toggleOperation').style.display = 'none';
+                document.getElementById('tableShowToggle').textContent = '[상세정보]';
+            } else {
+                document.getElementById('toggleOperation').style.display = 'block';
+                document.getElementById('tableShowToggle').textContent = '[숨기기]';
+            }
+        }
+
+        function findDeviceLoaction(deviceId) {
+            console.log(deviceId);
+        }
+
     //#diviceContainer
     title 장치 관리
     .row#deviceContatiner
         p#pageTitle 장치 목록
 
-    #map(style="width: 50%; height: 600px; margin-left: auto; margin-right: auto; margin-bottom: 1%; border: 2px solid")
-    .row#registerRow(style="width: 50%; margin-left: auto; margin-right: auto; ")
+    #map
+    .row#registerRow
         button(onClick='location.href = "/deviceRegister"' class='btn btn-dark mr-2' style="text-align: right") 등록
+        span#tableShowToggle(onclick='openCloseTable()') [상세정보]
 
-    // would be made device list table
+    .row#toggleOperation
+        table#deviceManageTable
+            thead#deviceManageTableHead
+                tr
+                    th(style="width: 15%") 장치 명
+                    th(style="width: 15%") 장치 타입
+                    th(style="width: 40%") 설치 장소
+                    th(style="width: 15%") 등록 일
+                    th(style="width: 15%") 수정 일
+            tbody#deviceManageTableTbody
+                 each deviceData in dataOfTable
+                     tr
+                         td #{deviceData.deviceName}
+                         td #{deviceData.deviceType}
+                         td(id=deviceData.deviceId onclick="findDeviceLoaction(" + `${deviceData.deviceId}` + ")")
+                             script.
+                                 searchCoordinateToAddress(#{deviceData.deviceLatitude}, #{deviceData.deviceLongitude}, #{deviceData.deviceId})
+                         td #{deviceData.registerDate}
+                         td #{deviceData.modifyDate}
+
