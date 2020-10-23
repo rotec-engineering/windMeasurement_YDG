@@ -5,13 +5,14 @@ block content
     script(type='text/javascript' src='https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=tpkaldfehz&submodules=geocoder')
 
     script.
-        let map
-        let marker
-        let infoWindow
-        let deviceImgSrc;
-        let latitude
-        let longitude
+        let map;
+        let marker;
+        let infoWindow;
+        let latitude;
+        let longitude;
         let position;
+        let deviceImg;                                                      // ImgFile variable
+        let deviceImgSrc;                                                   // previous ImgSrc
 
         $(function () {
             map = new naver.maps.Map("map", {
@@ -35,7 +36,7 @@ block content
             // naver.maps.Event.once(map, 'init_stylemap', initGeocoder);
         });
 
-        function searchCoordinateToAddress(latlng) {                                                            // coordinate to address
+        function searchCoordinateToAddress(latlng) {                        // coordinate to address
             infoWindow.close();
 
             naver.maps.Service.reverseGeocode({
@@ -80,7 +81,7 @@ block content
             });
         }
 
-        function searchAddressToCoordinate(address) {                                                           // address to coordinate
+        function searchAddressToCoordinate(address) {                       // address to coordinate
             naver.maps.Service.geocode({
                 query: address
             }, function (status, response) {
@@ -185,17 +186,36 @@ block content
             }
         }
 
-        // TODO: if user canceled the picture, preview part also should be disappeared
-        function uploadImgPreview() {                                                       // display picture that customer pic
-            let reader = new FileReader();
-            const fileInfo = document.getElementById("deviceImgInput").files[0];
-            reader.onload = function () {
-                document.getElementById("deviceImgView").src = reader.result;
-            };
+        function uploadImgPreview(fileInput) {                                              // display picture that customer pic
+            if (fileInput.files && fileInput.files[0]) {
+                if (fileInput.files[0].type.substring(0, 5) !== 'image') {                  // if user choose the none Img File, it should be not operated
+                    alert("이미지 파일이 아닙니다.\n이미지 파일을 선택해주세요.");
 
-            if (fileInfo) {
-                reader.readAsDataURL(fileInfo);
+                    document.getElementById("deviceImgInput").value = '';                   // must be used on over IE11
+
+                    return 0;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function () {
+                    document.getElementById("deviceImgView").src = reader.result;
+                };
+
+                deviceImg = fileInput.files[0];
+                reader.readAsDataURL(deviceImg);
             }
+        }
+
+        function deleteExistingImg() {                                                      // remove preView Img
+            let result = confirm("이미지를 삭제 하시겠습니까?");
+            if (!result) {
+                return 0;
+            }
+
+            deviceImg = undefined;
+            deviceImgSrc = '';
+            document.getElementById("deviceImgInput").value = '';                           // must be used on over IE11
+            document.getElementById("deviceImgView").src = '';
         }
 
         function updateDevice() {
@@ -210,7 +230,7 @@ block content
                 $("select[name= deviceOptions]").val();
 
             let form = new FormData();                                                      // I used that when I control about ImgData
-            form.append("deviceImg", $("#deviceImgInput")[0].files[0]);
+            form.append("deviceImg", deviceImg);
             form.append('deviceName', $("input[name= deviceName]").val());
             form.append('deviceType', deviceType);
             form.append('deviceLatitude', latitude);
@@ -236,6 +256,7 @@ block content
         }
 
     //#diviceContainer
+    title 장치 수정
     .row#deviceContatiner
         p#pageTitle 장치 수정
     .row#showTable
@@ -255,7 +276,9 @@ block content
                     td#map(rowspan="5" style="width: 600px")
                 tr
                     td(colspan="2")
-                        input(type="file" id="deviceImgInput" name="deviceImgInput" style="width: 100%" accept="image/*" onchange="uploadImgPreview()")
+                        input(type="file" id="deviceImgInput" name="deviceImgInput" style="width: 75%" accept="image/*" onchange="uploadImgPreview(this)")
+                        button#cancelPicture(onClick='deleteExistingImg()' style="width: 20%; float: right; font-size: 11px" class='btn btn-dark mr-2') X
+
                 tr
                     th 등록 장소
                     td

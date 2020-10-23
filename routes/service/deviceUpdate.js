@@ -108,12 +108,22 @@ router.post('/api/update', uploader.single('deviceImg'), (req, res) => {
 
     connection.query(registerQuery, (err, rows) => {
         if (!err) {
-            if(fileName !== '' || undefined) {                                                                          // not registered deviceImg
+            if(fileName !== '' && fileName !== undefined) {                                                             // when deviceImg is registered
                 fs.rename(fileSrc + fileName, deviceImgSrc, function (err) {             // file rename (if I need, I could divide ImgFolder follow with users)
                     if (err) {
                         throw err;
                     }
                 });
+
+                if(param.deviceImgSrc !== '') {                                                                                               // if Img was changed, existing Img would be deleted
+                    fs.unlink(param.deviceImgSrc, function (err) {
+                        if (err) {
+                            throw err;
+                        }
+                    });
+
+                    console.log("ImgFile del");
+                }
             }
             const successMsg = "수정을 완료했습니다.";
             res.send(successMsg);
@@ -123,15 +133,6 @@ router.post('/api/update', uploader.single('deviceImg'), (req, res) => {
             res.send(err);
         }
     });
-
-    if(fileName !== '') {                                                                                               // if Img was changed, existing Img would be deleted
-        fs.unlink(param.deviceImgSrc, function (err) {
-            if (err) {
-                throw err;
-            }
-        });
-        console.log("ImgFile del");
-    }
 });
 
 module.exports = router;
