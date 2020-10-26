@@ -99,22 +99,26 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 1%;
+    margin-bottom: 3%;
     width: 45%;
     text-align: center;
+    border: 2px solid;
+}
+#toggleOperation #deviceManageTable th, #toggleOperation #deviceManageTable td{
     border: 2px solid;
 }
 #toggleOperation #deviceManageTableHead {
     background-color: #adb5bd;
     border: 2px solid;
 }
-#toggleOperation #deviceManageTableHead tr th {
-    border: 2px solid;
-}
 #toggleOperation #deviceManageTableTbody {
     border: 2px solid;
 }
-#toggleOperation #deviceManageTableTbody tr td {
-    border: 2px solid;
+#toggleOperation #deviceManageTableTbody .deviceAddress {
+    cursor: pointer;
+}
+#toggleOperation #deviceManageTableTbody .deviceAddress:hover {
+    text-decoration: underline;
 }
 
 #tableShowToggle {

@@ -7,7 +7,9 @@ block content
     script.
         let map
         let markers = []
+        let sortMarkers = [];
         let infoWindows = [];
+        let abridgedInfoWindows = [];
         const latitude = 35.5039678;
         const longitude = 129.3055745;
 
@@ -46,43 +48,147 @@ block content
                     map: map,
                     position: position,
                 });
+                const tempMarker = {                                                                    // shallow copy prevention
+                    'latitude': deviceInfo[key].deviceLatitude,
+                    'longitude': deviceInfo[key].deviceLongitude,
+                    'key': key,
+                    'deviceName': deviceInfo[key].deviceName,
+                    'deviceType': deviceInfo[key].deviceType
+                };
 
-                const imgSrc = deviceInfo[key].deviceImgSrc === null ? '' : deviceInfo[key].deviceImgSrc.substring(9, deviceInfo[key].deviceImgSrc.length);
+                const deviceId = deviceInfo[key].deviceId;
+                const deviceName = deviceInfo[key].deviceName;
                 const deviceType = deviceInfo[key].deviceType;
+                const imgSrc = deviceInfo[key].deviceImgSrc === null ? '' : deviceInfo[key].deviceImgSrc.substring(9, deviceInfo[key].deviceImgSrc.length);
                 const registerDate = deviceInfo[key].registerDate;
                 const modifyDate = deviceInfo[key].modifyDate === null ? '' : deviceInfo[key].modifyDate;
-                const deviceId = deviceInfo[key].deviceId;
                 const infoWindow = new naver.maps.InfoWindow({                                          // infoWindow context setter
                     content: `
-                         <table>
-                           <tbody style="text-align: center">
-                             <tr>
-                               <td colspan="2"><img src="${imgSrc}"/></td>
-                             </tr>
-                             <tr>
-                               <th>장치 타입</th>
-                               <td> ${deviceType} </td>
-                             </tr>
-                             <tr>
-                               <th>등록 일</th>
-                               <td> ${registerDate} </td>
-                             </tr>
-                             <tr>
-                               <th>수정 일</th>
-                               <td> ${modifyDate} </td>
-                             </tr>
-                             <tr style="font-size: 12px">
-                               <th><button type="button" onclick="goToDeviceUpdate(${deviceId})" style="width: 100%">수정</button></th>
-                               <th><button type="button" onclick="deleteDevice(${deviceId})" style="width: 100%">삭제</button></th>
-                           </tbody>
-                         </table>
-                     `
+                        <table style="text-align: center;">
+                          <tbody>
+                            <tr>
+                              <td colspan="4"><img src="${imgSrc}"/></td>
+                            </tr>
+                            <tr>
+                              <th colspan="2">장치 이름</th>
+                              <td colspan="2"> ${deviceName} </td>
+                            </tr>
+                            <tr>
+                              <th colspan="2">장치 타입</th>
+                              <td colspan="2"> ${deviceType} </td>
+                            </tr>
+                            <tr>
+                              <th colspan="2">등록 일</th>
+                              <td colspan="2"> ${registerDate} </td>
+                            </tr>
+                            <tr>
+                              <th colspan="2">수정 일</th>
+                              <td colspan="2"> ${modifyDate} </td>
+                            </tr>
+                            <tr style="font-size: 12px">
+                              <th><button type="button" onclick="selectAnotherInfowindow('moveLeft', ${key})" style="width: 100%"> < </button></th>
+                              <th><button type="button" onclick="goToDeviceUpdate(${deviceId})" style="width: 100%">수정</button></th>
+                              <th><button type="button" onclick="deleteDevice(${deviceId})" style="width: 100%">삭제</button></th>
+                              <th><button type="button" onclick="selectAnotherInfowindow('moveRight', ${key})" style="width: 100%"> > </button></th>
+                          </tbody>
+                        </table>
+                    `
                 });
 
                 markers.push(marker);
                 infoWindows.push(infoWindow);
+                sortMarkers.push(tempMarker);
                 naver.maps.Event.addListener(markers[key], 'click', getClickHandler(key));              // set eventListener
             }
+
+            sortMarkers.sort(function (a, b) {                                                          // sort by latitude
+                return parseFloat(a.latitude) - parseFloat(b.latitude);
+            });
+            console.log(sortMarkers);
+
+            for (let i = 0; i < sortMarkers.length; i++) {
+                let abridgedInfoWindow = new naver.maps.InfoWindow();
+                let tempInfoWindow = `
+                    <table style="text-align: center; font-size: 12px" class="table table-bordered table-hover">
+                      <thead style="background: #adb5bd">
+                        <th>
+                            장치 이름
+                        </th>
+                        <th>
+                            장치 타입
+                        </th>
+                      </thead>
+                      <tbody>
+                `;
+                for(let j = 0; j < sortMarkers.length; j++) {
+                    if(Math.abs(sortMarkers[j].latitude - sortMarkers[i].latitude) <= 0.005) {          // difference of latitude -> 0.005
+                        if(Math.abs(sortMarkers[i].longitude - sortMarkers[j].longitude) <= 0.005) {    // difference of longitude -> 0.005
+                            tempInfoWindow += `
+                                <tr onclick="clickDeviceList(${sortMarkers[j].key})">
+                                  <td>
+                                      ${sortMarkers[j].deviceName}
+                                  </td>
+                                  <td>
+                                      ${sortMarkers[j].deviceType}
+                                  </td>
+                            `;
+                        }
+                    }
+                    else {
+                        continue;
+                    }
+                }
+                tempInfoWindow += `
+                        </tr>
+                      </tbody>
+                    </table>
+                `;
+
+                abridgedInfoWindow.setContent(tempInfoWindow);
+                abridgedInfoWindows.push(abridgedInfoWindow);
+                naver.maps.Event.addListener(markers[sortMarkers[i].key], 'mouseover', getMouseoverHandler(i));         // set eventListener
+                naver.maps.Event.addListener(markers[sortMarkers[i].key], 'mouseout', getMouseoutHandler(i));           // set eventListener
+                naver.maps.Event.addListener(markers[sortMarkers[i].key], 'click', clickDeviceList(i));                 // set eventListener
+            }
+        }
+
+        function getClickHandler(seq) {                                                                 // event handler about 'click'
+            return function () {
+                const marker = markers[seq]
+                const infoWindow = infoWindows[seq];
+
+                if (infoWindow.getMap()) {
+                    infoWindow.close();
+                } else {
+                    infoWindow.open(map, marker);
+                }
+            }
+        }
+
+        function getMouseoverHandler(seq) {                                                             // event handler about 'mouseOver'
+            return function () {
+                const marker = markers[sortMarkers[seq].key];
+                const abridgedInfoWindow = abridgedInfoWindows[seq];
+                abridgedInfoWindow.open(map, marker);
+            };
+        }
+
+        function getMouseoutHandler(seq) {                                                             // event handler about 'mouseOut'
+            return function () {
+                const abridgedInfoWindow = abridgedInfoWindows[seq];
+                setTimeout(function () {
+                    // abridgedInfoWindow.close();
+                }, 1000);
+            };
+        }
+
+        function clickDeviceList(seq) {                                                                //
+            console.log(seq);
+            const marker = markers[seq]
+            const infoWindow = infoWindows[seq];
+
+            infoWindow.open(map, marker);
+
         }
 
         // function updateMarkers(map, markers) {                                                          // show marker & infoWindow following with map size
@@ -112,7 +218,7 @@ block content
         // }
 
         function searchCoordinateToAddress(Lat, Lng, textId) {
-            const latlng = naver.maps.LatLng(Lat, Lng);
+            const latlng = new naver.maps.LatLng(Lat, Lng);
             let htmlAddresses = [];
 
             naver.maps.Service.reverseGeocode({
@@ -149,18 +255,35 @@ block content
             });
         }
 
-        function getClickHandler(seq) {                                                                 // event handler about 'click'
-            return function () {
-                const marker = markers[seq]
-                const infoWindow = infoWindows[seq];
-
-                if (infoWindow.getMap()) {
-                    infoWindow.close();
-                } else {
-                    infoWindow.open(map, marker);
-                }
-            }
-        }
+        // function selectAnotherInfowindow(move, key) {
+        //     let marker;
+        //     let infoWindow;
+        //     if (move === 'moveLeft' && key - 1 > -1) {
+        //         marker = markers[key - 1]
+        //         infoWindow = infoWindows[key - 1];
+        //         if (infoWindow.getMap()) {
+        //             infoWindow.close();
+        //         } else {
+        //             infoWindow.open(map, marker);
+        //         }
+        //         console.log(key + "l");
+        //         console.log('left');
+        //         return 0;
+        //     } else if (move === 'moveRight') {
+        //         marker = markers[key + 1]
+        //         infoWindow = infoWindows[key + 1];
+        //         if (infoWindow.getMap()) {
+        //             infoWindow.close();
+        //         } else {
+        //             infoWindow.open(map, marker);
+        //         }
+        //         console.log(key);
+        //         console.log('right');
+        //         return 0;
+        //     } else {
+        //         console.log('moveInfoWindow Err');
+        //     }
+        // }
 
         function goToDeviceUpdate(deviceId) {
             location.href = '/deviceUpdate?deviceId=' + deviceId;
@@ -183,7 +306,7 @@ block content
                 success: (result) => {
                     console.log(result);
                     alert("등록된 장치를 삭제 했습니다.");
-                    location.reload();                                                                  // TODO: search the another way instead of reload()!
+                    location.reload();                                                                  //-- TODO: search the another way instead of reload()! --//
                 },
                 error: (err) => {
                     console.log(err)
@@ -201,8 +324,12 @@ block content
             }
         }
 
-        function findDeviceLoaction(deviceId) {
-            console.log(deviceId);
+        function findDeviceLoaction(latitude, longitude) {
+            const point = new naver.maps.LatLng(latitude, longitude);
+
+            map.setCenter(point);
+            map.setZoom(17);
+            window.scrollTo(0, 0);
         }
 
     //#diviceContainer
@@ -216,7 +343,7 @@ block content
         span#tableShowToggle(onclick='openCloseTable()') [상세정보]
 
     .row#toggleOperation
-        table#deviceManageTable
+        table#deviceManageTable(class="table table-bordered table-hover")
             thead#deviceManageTableHead
                 tr
                     th(style="width: 15%") 장치 명
@@ -229,7 +356,7 @@ block content
                      tr
                          td #{deviceData.deviceName}
                          td #{deviceData.deviceType}
-                         td(id=deviceData.deviceId onclick="findDeviceLoaction(" + `${deviceData.deviceId}` + ")")
+                         td(class="deviceAddress" id=deviceData.deviceId onclick="findDeviceLoaction(" + `${deviceData.deviceLatitude}` + "," + `${deviceData.deviceLongitude}` + ")")
                              script.
                                  searchCoordinateToAddress(#{deviceData.deviceLatitude}, #{deviceData.deviceLongitude}, #{deviceData.deviceId})
                          td #{deviceData.registerDate}
