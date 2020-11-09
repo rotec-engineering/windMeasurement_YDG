@@ -101,48 +101,50 @@ block content
                 naver.maps.Event.addListener(markers[key], 'click', getClickHandler(key));              // set eventListener
             }
 
+            setAbridgedInfoWindow();
+        }
+
+        function setAbridgedInfoWindow() {
             sortMarkers.sort(function (a, b) {                                                          // sort by latitude
                 return parseFloat(a.latitude) - parseFloat(b.latitude);
             });
-            console.log(sortMarkers);
 
             for (let i = 0; i < sortMarkers.length; i++) {
                 let abridgedInfoWindow = new naver.maps.InfoWindow();
                 let tempInfoWindow = `
-                    <table style="text-align: center; font-size: 12px" class="table table-bordered table-hover">
-                      <thead style="background: #adb5bd">
-                        <th>
-                            장치 이름
-                        </th>
-                        <th>
-                            장치 타입
-                        </th>
-                      </thead>
-                      <tbody>
-                `;
-                for(let j = 0; j < sortMarkers.length; j++) {
-                    if(Math.abs(sortMarkers[j].latitude - sortMarkers[i].latitude) <= 0.005) {          // difference of latitude -> 0.005
-                        if(Math.abs(sortMarkers[i].longitude - sortMarkers[j].longitude) <= 0.005) {    // difference of longitude -> 0.005
-                            tempInfoWindow += `
-                                <tr onclick="clickDeviceList(${sortMarkers[j].key})">
-                                  <td>
-                                      ${sortMarkers[j].deviceName}
-                                  </td>
-                                  <td>
-                                      ${sortMarkers[j].deviceType}
-                                  </td>
+                                <div style="width: 100%; height: 200px; overflow: auto">
+                                  <table style="text-align: center; font-size: 12px" class="table table-bordered table-hover">
+                                    <thead style="background: #adb5bd">
+                                      <th>
+                                          장치 이름
+                                      </th>
+                                      <th>
+                                          장치 타입
+                                      </th>
+                                    </thead>
+                                    <tbody>
                             `;
+                for (let j = 0; j < sortMarkers.length; j++) {
+                    if (Math.abs(sortMarkers[j].latitude - sortMarkers[i].latitude) <= 0.005) {          // difference of latitude -> 0.005
+                        if (Math.abs(sortMarkers[i].longitude - sortMarkers[j].longitude) <= 0.005) {    // difference of longitude -> 0.005
+                            tempInfoWindow += `
+                              <tr onclick="clickDeviceList(${sortMarkers[j].key})">
+                                <td>
+                                  ${sortMarkers[j].deviceName}
+                                </td>
+                                <td>
+                                  ${sortMarkers[j].deviceType}
+                                </td>
+                              `;
                         }
-                    }
-                    else {
-                        continue;
                     }
                 }
                 tempInfoWindow += `
-                        </tr>
-                      </tbody>
-                    </table>
-                `;
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                            `;
 
                 abridgedInfoWindow.setContent(tempInfoWindow);
                 abridgedInfoWindows.push(abridgedInfoWindow);
@@ -152,7 +154,7 @@ block content
             }
         }
 
-        function getClickHandler(seq) {                                                                 // event handler about 'click'
+        function getClickHandler(seq) {                                                                 // event handler about 'click' for marker
             return function () {
                 const marker = markers[seq]
                 const infoWindow = infoWindows[seq];
@@ -170,6 +172,7 @@ block content
                 const marker = markers[sortMarkers[seq].key];
                 const abridgedInfoWindow = abridgedInfoWindows[seq];
                 abridgedInfoWindow.open(map, marker);
+                // console.log(sortMarkers);
             };
         }
 
@@ -182,13 +185,12 @@ block content
             };
         }
 
-        function clickDeviceList(seq) {                                                                //
-            console.log(seq);
+        function clickDeviceList(seq) {                                                                // event handler about 'click' on DeviceList
+            // console.log(seq);
             const marker = markers[seq]
             const infoWindow = infoWindows[seq];
 
             infoWindow.open(map, marker);
-
         }
 
         // function updateMarkers(map, markers) {                                                          // show marker & infoWindow following with map size
